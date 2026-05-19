@@ -3,11 +3,12 @@
 namespace App\Http\Controllers\Api;
 
 use App\Helpers\ApiResponse;
+use App\Services\AuthService;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\NguoiDungResource;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Requests\Auth\RegisterRequest;
-use App\Services\AuthService;
-use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
@@ -22,26 +23,37 @@ class AuthController extends Controller
     /**
      * Register
      */
-    public function register(RegisterRequest $request)
-    {
-        $result = $this->authService->register(
-            $request->validated()
-        );
+    public function register(
+        RegisterRequest $request
+    ) {
+        $result = $this->authService
+            ->register(
+                $request->validated()
+            );
 
         return ApiResponse::success(
-            $result,
-            'Register successful'
+            [
+                'user' => new NguoiDungResource(
+                    $result['user']
+                ),
+
+                'token' => $result['token']
+            ],
+            'Register successful',
+            201
         );
     }
 
     /**
      * Login
      */
-    public function login(LoginRequest $request)
-    {
-        $result = $this->authService->login(
-            $request->validated()
-        );
+    public function login(
+        LoginRequest $request
+    ) {
+        $result = $this->authService
+            ->login(
+                $request->validated()
+            );
 
         if (!$result) {
             return ApiResponse::error(
@@ -52,30 +64,38 @@ class AuthController extends Controller
         }
 
         return ApiResponse::success(
-            $result,
+            [
+                'user' => new NguoiDungResource(
+                    $result['user']
+                ),
+
+                'token' => $result['token']
+            ],
             'Login successful'
         );
     }
 
     /**
-     * Current User
+     * Current user
      */
-    public function me(Request $request)
+    public function me()
     {
         return ApiResponse::success(
-            $request->user(),
-            'Current user'
+            new NguoiDungResource(
+                Auth::user()
+            )
         );
     }
 
     /**
      * Logout
      */
-    public function logout(Request $request)
+    public function logout()
     {
-        $request->user()
-            ->currentAccessToken()
-            ->delete();
+        $this->authService
+            ->logout(
+                Auth::user()
+            );
 
         return ApiResponse::success(
             null,

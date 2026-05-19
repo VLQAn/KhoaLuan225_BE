@@ -2,32 +2,51 @@
 
 namespace App\Services;
 
-use App\Interfaces\UserRepositoryInterface;
-use Illuminate\Support\Facades\Hash;
+use App\Models\VaiTro;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use App\Repositories\Interfaces\AuthRepositoryInterface;
 
 class AuthService
 {
-    protected $userRepository;
+    protected $authRepository;
 
     public function __construct(
-        UserRepositoryInterface $userRepository
+        AuthRepositoryInterface $authRepository
     ) {
-        $this->userRepository = $userRepository;
+        $this->authRepository = $authRepository;
     }
 
     /**
      * Register
      */
-    public function register(array $data)
-    {
-        $data['password'] = Hash::make($data['password']);
+    public function register(
+        array $data
+    ) {
+        $customerRole = VaiTro::where(
+            'vaiTro',
+            'customer'
+        )->first();
 
-        $user = $this->userRepository->create($data);
+        if (!$customerRole) {
+            throw new \Exception(
+                'Customer role not found'
+            );
+        }
 
-        $user->assignRole('customer');
+        $user = $this->authRepository
+            ->create([
+                'tenNguoiDung' => $data['tenNguoiDung'],
+                'email' => $data['email'],
+                'matKhau' => Hash::make(
+                    $data['matKhau']
+                ),
+                'vaiTro' => $customerRole->maVaiTro
+            ]);
 
-        $token = $user->createToken('auth_token')->plainTextToken;
+        $token = $user
+            ->createToken('auth_token')
+            ->plainTextToken;
 
         return [
             'user' => $user,
@@ -38,19 +57,39 @@ class AuthService
     /**
      * Login
      */
-    public function login(array $data)
-    {
-        if (!Auth::attempt($data)) {
-            return false;
+    public function login(
+        array $data
+    ) {
+        $user = $this->authRepository
+            ->findByEmail($data['email']);
+
+        if (
+            !$user ||
+            !Hash::check(
+                $data['matKhau'],
+                $user->matKhau
+            )
+        ) {
+            return null;
         }
 
-        $user = Auth::user();
-
-        $token = $user->createToken('auth_token')->plainTextToken;
+        $token = $user
+            ->createToken('auth_token')
+            ->plainTextToken;
 
         return [
             'user' => $user,
             'token' => $token
         ];
+    }
+
+    /**
+     * Logout
+     */
+    public function logout(
+        $user
+    ): void {
+        $user->currentAccessToken()
+            ->delete();
     }
 }
