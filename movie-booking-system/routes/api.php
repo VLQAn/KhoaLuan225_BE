@@ -51,46 +51,15 @@ Route::prefix('auth')->group(function () {
 
 /*
 |--------------------------------------------------------------------------
-| Public Movie APIs
+| Movies
 |--------------------------------------------------------------------------
 */
 
-Route::prefix('movies')->group(function () {
+Route::middleware('auth:sanctum')
+    ->group(function () {
 
-    Route::get('/', [
-        MovieController::class,
-        'index'
-    ]);
-
-    Route::get('/{id}', [
-        MovieController::class,
-        'show'
-    ]);
-});
-
-
-/*
-|--------------------------------------------------------------------------
-| Admin Movie APIs
-|--------------------------------------------------------------------------
-*/
-
-Route::middleware([
-    'auth:sanctum'
-])->prefix('admin/movies')->group(function () {
-
-    Route::post('/', [
-        MovieController::class,
-        'store'
-    ]);
-
-    Route::put('/{id}', [
-        MovieController::class,
-        'update'
-    ]);
-
-    Route::delete('/{id}', [
-        MovieController::class,
-        'destroy'
-    ]);
-});
+        Route::apiResource(
+            'movies',
+            MovieController::class
+        );
+    });

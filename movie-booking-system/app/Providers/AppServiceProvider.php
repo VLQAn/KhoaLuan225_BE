@@ -5,8 +5,8 @@ namespace App\Providers;
 use Illuminate\Support\ServiceProvider;
 use App\Interfaces\UserRepositoryInterface;
 use App\Repositories\UserRepository;
-use App\Interfaces\MovieRepositoryInterface;
-use App\Repositories\MovieRepository;
+use App\Repositories\Eloquent\MovieRepository;
+use App\Repositories\Interfaces\MovieRepositoryInterface;
 use App\Repositories\Eloquent\AuthRepository;
 use App\Repositories\Interfaces\AuthRepositoryInterface;
 

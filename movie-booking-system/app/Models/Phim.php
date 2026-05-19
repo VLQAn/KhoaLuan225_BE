@@ -3,14 +3,19 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
-class Movie extends Model
+class Phim extends Model
 {
+    protected $table = 'phim';
+
+    protected $primaryKey = 'maPhim';
+
     protected $fillable = [
         'tieuDe',
         'moTa',
         'thoiLuong',
-        'ngayCongChieu',
+        'ngayKhoiChieu',
         'anhPoster',
         'anhBanner',
         'danhGia',
@@ -20,13 +25,15 @@ class Movie extends Model
     ];
 
     /**
-     * Genres relationship
+     * Thể loại
      */
-    public function genres()
+    public function theLoai(): BelongsToMany
     {
         return $this->belongsToMany(
-            Genre::class
+            TheLoai::class,
+            'phim_the_loai',
+            'maPhim',      
+            'maTheLoai'    
         );
     }
-
 }

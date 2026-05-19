@@ -15,18 +15,23 @@ class MovieResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'id' => $this->id,
-            'tieuDe' => $this->title,
-            'moTa' => $this->description,
-            'thoiLuong' => $this->duration,
-            'ngayCongChieu' => $this->release_date,
-            'anhPoster' => $this->poster,
-            'anhBanner' => $this->banner,
-            'danhGia' => $this->rating,
-            'dienVien' => $this->actors,
-            'daoDien' => $this->director,
-            'trangThai' => $this->status,
-            'theLoai' => $this->genres,
+            'maPhim' => $this->maPhim,
+            'tieuDe' => $this->tieuDe,
+            'moTa' => $this->moTa,
+            'thoiLuong' => $this->thoiLuong,
+            'ngayCongChieu' => $this->ngayCongChieu,
+            'anhPoster' => $this->anhPoster,
+            'anhBanner' => $this->anhBanner,
+            'danhGia' => $this->danhGia,
+            'dienVien' => $this->dienVien,
+            'daoDien' => $this->daoDien,
+            'trangThai' => $this->trangThai,
+            'theLoai' => $this->theLoai->map(function ($theLoai) {
+                return [
+                    'maTheLoai' => $theLoai->maTheLoai,
+                    'tenTheLoai' => $theLoai->tenTheLoai,
+                ];
+            }),
             'created_at' => $this->created_at,
         ];
     }

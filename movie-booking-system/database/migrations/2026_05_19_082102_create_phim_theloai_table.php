@@ -11,11 +11,25 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('PHIM_THELOAI', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('phim_id')->constrained('PHIM')->onDelete('cascade');
-            $table->foreignId('theloai_id')->constrained('THELOAI')->onDelete('cascade');
-            $table->timestamps();
+        Schema::create('phim_the_loai', function (Blueprint $table) {
+
+            $table->unsignedBigInteger('maPhim');
+            $table->unsignedBigInteger('maTheLoai');
+
+            // FK phim
+            $table->foreign('maPhim')
+                ->references('maPhim')
+                ->on('phim')
+                ->onDelete('cascade');
+
+            // FK thể loại
+            $table->foreign('maTheLoai')
+                ->references('maTheLoai')
+                ->on('the_loai')
+                ->onDelete('cascade');
+
+            // tránh trùng dữ liệu
+            $table->primary(['maPhim', 'maTheLoai']);
         });
     }
 
@@ -24,6 +38,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('PHIM_THELOAI');
+        Schema::dropIfExists('phim_the_loai');
     }
 };

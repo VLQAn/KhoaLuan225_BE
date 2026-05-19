@@ -66,6 +66,7 @@ return [
             'driver' => 'eloquent',
             'model' => env('AUTH_MODEL', NguoiDung::class),
         ],
+        
 
         // 'users' => [
         //     'driver' => 'database',

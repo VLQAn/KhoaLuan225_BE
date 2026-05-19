@@ -9,21 +9,11 @@ use Symfony\Component\HttpFoundation\Response;
 
 class RoleMiddleware
 {
-    /**
-     * Handle request
-     */
-    public function handle(
-        Request $request,
-        Closure $next,
-        string $role
-    ): Response {
-
+    public function handle(Request $request, Closure $next, string $role): Response
+    {
         $user = Auth::user();
 
-        if (
-            !$user ||
-            !$user->hasRole($role)
-        ) {
+        if (!$user || $user->role !== $role) {
             return response()->json([
                 'success' => false,
                 'message' => 'Unauthorized'

@@ -54,7 +54,8 @@ class NguoiDung extends Authenticatable
         string $role
     ): bool {
 
-        return $this->role
-            && $this->role->vaiTro === $role;
+        return strtolower(
+            $this->role?->vaiTro
+        ) === strtolower($role);
     }
 }

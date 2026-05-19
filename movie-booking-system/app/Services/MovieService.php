@@ -2,8 +2,7 @@
 
 namespace App\Services;
 
-use Illuminate\Support\Str;
-use App\Interfaces\MovieRepositoryInterface;
+use App\Repositories\Interfaces\MovieRepositoryInterface;
 
 class MovieService
 {
@@ -12,7 +11,8 @@ class MovieService
     public function __construct(
         MovieRepositoryInterface $movieRepository
     ) {
-        $this->movieRepository = $movieRepository;
+        $this->movieRepository =
+            $movieRepository;
     }
 
     /**
@@ -20,25 +20,28 @@ class MovieService
      */
     public function getAllMovies()
     {
-        return $this->movieRepository->getAll();
+        return $this->movieRepository
+            ->getAll();
     }
 
     /**
      * Get movie detail
      */
-    public function getMovieDetail(int $id)
-    {
-        return $this->movieRepository->findById($id);
+    public function getMovieDetail(
+        int $id
+    ) {
+        return $this->movieRepository
+            ->findById($id);
     }
 
     /**
      * Create movie
      */
-    public function createMovie(array $data)
-    {
-        $data['slug'] = Str::slug($data['title']);
-
-        return $this->movieRepository->create($data);
+    public function createMovie(
+        array $data
+    ) {
+        return $this->movieRepository
+            ->create($data);
     }
 
     /**
@@ -48,21 +51,17 @@ class MovieService
         int $id,
         array $data
     ) {
-        if (isset($data['title'])) {
-            $data['slug'] = Str::slug($data['title']);
-        }
-
-        return $this->movieRepository->update(
-            $id,
-            $data
-        );
+        return $this->movieRepository
+            ->update($id, $data);
     }
 
     /**
      * Delete movie
      */
-    public function deleteMovie(int $id)
-    {
-        return $this->movieRepository->delete($id);
+    public function deleteMovie(
+        int $id
+    ) {
+        return $this->movieRepository
+            ->delete($id);
     }
 }
