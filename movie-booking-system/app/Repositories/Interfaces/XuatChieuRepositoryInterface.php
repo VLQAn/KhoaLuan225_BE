@@ -17,6 +17,7 @@ interface XuatChieuRepositoryInterface
     public function checkRoomScheduleConflict(
         int $maPhong,
         string $startTime,
-        string $endTime
+        string $endTime,
+        ?int $ignoreId = null
     );
 }

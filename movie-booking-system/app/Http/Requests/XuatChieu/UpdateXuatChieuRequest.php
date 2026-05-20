@@ -15,17 +15,17 @@ class UpdateXuatChieuRequest extends FormRequest
     {
         return [
             'maPhim' => [
-                'required',
+                'sometimes',
                 'exists:phim,maPhim'
             ],
 
             'maPhong' => [
-                'required',
+                'sometimes',
                 'exists:phong_chieu,maPhong'
             ],
 
             'thoiGianBatDau' => [
-                'required',
+                'sometimes',
                 'date',
                 'after:now'
             ]

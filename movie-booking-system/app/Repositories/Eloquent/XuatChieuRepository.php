@@ -6,7 +6,7 @@ use App\Models\XuatChieu;
 use App\Repositories\Interfaces\XuatChieuRepositoryInterface;
 
 class XuatChieuRepository
-    implements XuatChieuRepositoryInterface
+implements XuatChieuRepositoryInterface
 {
     protected $model;
 
@@ -61,25 +61,35 @@ class XuatChieuRepository
      */
     public function checkRoomScheduleConflict(
         int $maPhong,
-        string $startTime,
-        string $endTime
+        $startTime,
+        $endTime,
+        ?int $ignoreId = null
     ) {
-        return $this->model
+        $query = $this->model
             ->where('maPhong', $maPhong)
             ->where(function ($query)
-                use ($startTime, $endTime) {
+            use ($startTime, $endTime) {
 
                 $query->where(
                     'thoiGianBatDau',
                     '<',
                     $endTime
                 )
-                ->where(
-                    'thoiGianKetThuc',
-                    '>',
-                    $startTime
-                );
-            })
-            ->exists();
+                    ->where(
+                        'thoiGianKetThuc',
+                        '>',
+                        $startTime
+                    );
+            });
+
+        if ($ignoreId !== null) {
+            $query->where(
+                'maXuatChieu',
+                '!=',
+                $ignoreId
+            );
+        }
+
+        return $query->exists();
     }
 }

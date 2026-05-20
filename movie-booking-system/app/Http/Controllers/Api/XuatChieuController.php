@@ -32,7 +32,7 @@ class XuatChieuController extends Controller
             ->getXuatChieuById($id);
 
         return response()->json($data);
-    }   
+    }
 
     public function store(
         StoreXuatChieuRequest $request
@@ -53,16 +53,18 @@ class XuatChieuController extends Controller
         UpdateXuatChieuRequest $request,
         $id
     ): JsonResponse {
-        $data = $this->xuatChieuService->updateXuatChieu(
-            $id,
-            $request->validated()
-        );
+
+        $data = $this->xuatChieuService
+            ->updateXuatChieu(
+                $id,
+                $request->validated()
+            );
 
         return response()->json([
             'message' => 'Cập nhật xuất chiếu thành công',
             'data' => $data
         ]);
-    }   
+    }
 
     public function destroy($id): JsonResponse
     {
@@ -71,5 +73,5 @@ class XuatChieuController extends Controller
         return response()->json([
             'message' => 'Xóa xuất chiếu thành công'
         ]);
-    }   
+    }
 }
