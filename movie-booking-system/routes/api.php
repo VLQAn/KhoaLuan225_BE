@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\MovieController;
+use App\Http\Controllers\Api\RapChieuController;
 
 /*
 |--------------------------------------------------------------------------
@@ -61,5 +62,20 @@ Route::middleware('auth:sanctum')
         Route::apiResource(
             'movies',
             MovieController::class
+        );
+    });
+
+/*
+|--------------------------------------------------------------------------
+| Rap Chieu
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware('auth:sanctum')
+    ->group(function () {
+
+        Route::apiResource(
+            'rap-chieu',
+            RapChieuController::class
         );
     });
