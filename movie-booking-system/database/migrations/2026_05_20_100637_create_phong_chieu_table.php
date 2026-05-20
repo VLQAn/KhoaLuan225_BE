@@ -12,8 +12,21 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('phong_chieu', function (Blueprint $table) {
-            $table->id();
+            $table->id('maPhong');
+
+            $table->unsignedBigInteger('maRap');
+
+            $table->string('tenPhong');
+
             $table->timestamps();
+
+            /**
+             * Foreign key
+             */
+            $table->foreign('maRap')
+                ->references('maRap')
+                ->on('rap_chieu')
+                ->onDelete('cascade');
         });
     }
 
