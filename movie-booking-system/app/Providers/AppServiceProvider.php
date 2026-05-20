@@ -15,6 +15,8 @@ use App\Repositories\Eloquent\PhongChieuRepository;
 use App\Repositories\Interfaces\PhongChieuRepositoryInterface;
 use App\Repositories\Eloquent\GheRepository;
 use App\Repositories\Interfaces\GheRepositoryInterface;
+use App\Repositories\Eloquent\XuatChieuRepository;
+use App\Repositories\Interfaces\XuatChieuRepositoryInterface;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -29,6 +31,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(RapChieuRepositoryInterface::class, RapChieuRepository::class);
         $this->app->bind(PhongChieuRepositoryInterface::class, PhongChieuRepository::class);
         $this->app->bind(GheRepositoryInterface::class, GheRepository::class);
+        $this->app->bind(XuatChieuRepositoryInterface::class, XuatChieuRepository::class);
     }
     
     /**

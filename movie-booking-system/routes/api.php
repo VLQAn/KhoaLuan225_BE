@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\MovieController;
 use App\Http\Controllers\Api\RapChieuController;
 use App\Http\Controllers\Api\PhongChieuController;
 use App\Http\Controllers\Api\GheController;
+use App\Http\Controllers\Api\XuatChieuController;
 
 /*
 |--------------------------------------------------------------------------
@@ -116,4 +117,18 @@ Route::middleware('auth:sanctum')
             GheController::class
         );
     });
-    
+
+/*
+|--------------------------------------------------------------------------
+| Xuat Chieu
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware('auth:sanctum')
+    ->group(function () {
+
+        Route::apiResource(
+            'xuat-chieu',
+            XuatChieuController::class
+        );
+    });
