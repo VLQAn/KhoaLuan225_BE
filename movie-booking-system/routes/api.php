@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\MovieController;
 use App\Http\Controllers\Api\RapChieuController;
 use App\Http\Controllers\Api\PhongChieuController;
+use App\Http\Controllers\Api\GheController;
 
 /*
 |--------------------------------------------------------------------------
@@ -95,3 +96,24 @@ Route::middleware('auth:sanctum')
             PhongChieuController::class
         );
     });
+
+/*
+|--------------------------------------------------------------------------
+| Ghe
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware('auth:sanctum')
+    ->group(function () {
+
+        Route::post(
+            'ghe/generate',
+            [GheController::class, 'generateSeats']
+        );
+
+        Route::apiResource(
+            'ghe',
+            GheController::class
+        );
+    });
+    
