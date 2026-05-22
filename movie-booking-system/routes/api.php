@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\XuatChieuController;
 use App\Http\Controllers\Api\BapNuocController;
 use App\Http\Controllers\Api\GiaVeController;
 use App\Http\Controllers\Api\KhuyenMaiController;
+use App\Http\Controllers\Api\DatVeController;
 
 /*
 |--------------------------------------------------------------------------
@@ -177,5 +178,19 @@ Route::middleware('auth:sanctum')
         Route::apiResource(
             'khuyen-mai',
             KhuyenMaiController::class
+        );
+    });
+
+/*
+|-------------------------------------------------------------------------- 
+| Dat Ve
+|-------------------------------------------------------------------------- 
+*/
+Route::middleware('auth:sanctum')
+    ->group(function () {
+
+        Route::post(
+            'dat-ve',
+            [DatVeController::class, 'store']
         );
     });
