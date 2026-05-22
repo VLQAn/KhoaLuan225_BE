@@ -40,4 +40,16 @@ class RapChieu extends Model
             'maRap'
         );
     }
+
+    /**
+     * Relationship with BapNuoc
+     */
+    public function bapNuocs()
+    {
+        return $this->hasMany(
+            BapNuoc::class,
+            'maRap',
+            'maRap'
+        );
+    }
 }

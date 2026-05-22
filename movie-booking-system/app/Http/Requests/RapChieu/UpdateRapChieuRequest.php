@@ -23,6 +23,8 @@ class UpdateRapChieuRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'maNguoiDung' => 'required|exists:nguoi_dung,maNguoiDung',
+            
             'tenRap' => 'sometimes|string|max:255',
 
             'diaChi' => 'sometimes|string|max:500',

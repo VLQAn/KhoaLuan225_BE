@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\RapChieuController;
 use App\Http\Controllers\Api\PhongChieuController;
 use App\Http\Controllers\Api\GheController;
 use App\Http\Controllers\Api\XuatChieuController;
+use App\Http\Controllers\Api\BapNuocController;
 
 /*
 |--------------------------------------------------------------------------
@@ -130,5 +131,20 @@ Route::middleware('auth:sanctum')
         Route::apiResource(
             'xuat-chieu',
             XuatChieuController::class
+        );
+    });
+
+/*
+|--------------------------------------------------------------------------
+| Bap Nuoc
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware('auth:sanctum')
+    ->group(function () {
+
+        Route::apiResource(
+            'bap-nuoc',
+            BapNuocController::class
         );
     });

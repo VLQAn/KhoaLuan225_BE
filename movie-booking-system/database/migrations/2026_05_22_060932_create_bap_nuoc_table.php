@@ -12,7 +12,19 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('bap_nuoc', function (Blueprint $table) {
-            $table->id();
+            $table->id('maMon');
+
+            $table->unsignedBigInteger('maRap')->nullable()->after('maMon');
+            $table->foreign('maRap')->references('maRap')->on('rap_chieu')->onDelete('cascade');
+
+            $table->string('tenMon');
+
+            $table->decimal('gia', 8, 2);
+
+            $table->string('hinhAnh')->nullable();
+
+            $table->text('moTa')->nullable();
+
             $table->timestamps();
         });
     }
