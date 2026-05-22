@@ -58,4 +58,13 @@ class NguoiDung extends Authenticatable
             $this->role?->vaiTro
         ) === strtolower($role);
     }
+
+    public function rapChieus()
+    {
+        return $this->hasMany(
+            RapChieu::class,
+            'maNguoiDung',
+            'maNguoiDung'
+        );
+    }
 }

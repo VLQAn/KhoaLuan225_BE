@@ -12,9 +12,22 @@ class RapChieu extends Model
     protected $primaryKey = 'maRap';
 
     protected $fillable = [
+        'maNguoiDung',
         'tenRap',
         'diaChi',
     ];
+
+    /**
+     * Relationship with NguoiDung (owner of the cinema)
+     */
+    public function chuRap()
+    {
+        return $this->belongsTo(
+            NguoiDung::class,
+            'maNguoiDung',
+            'maNguoiDung'
+        );
+    }
 
     /**
      * Relationship with PhongChieu

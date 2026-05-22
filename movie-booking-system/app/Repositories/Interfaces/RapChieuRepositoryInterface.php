@@ -6,6 +6,8 @@ interface RapChieuRepositoryInterface
 {
     public function getAll();
 
+    public function getByOwner($maNguoiDung);
+
     public function getById($id);
 
     public function create(array $data);

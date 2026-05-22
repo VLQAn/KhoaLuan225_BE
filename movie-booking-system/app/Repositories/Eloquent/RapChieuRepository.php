@@ -21,6 +21,15 @@ class RapChieuRepository implements RapChieuRepositoryInterface
             ->paginate(10);
     }
 
+    public function getByOwner($maNguoiDung)
+    {
+        return RapChieu::where(
+            'maNguoiDung',
+            $maNguoiDung
+        )->get();
+    }
+
+
     public function getById($id)
     {
         return $this->model->findOrFail($id);

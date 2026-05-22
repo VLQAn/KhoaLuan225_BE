@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Repositories\Interfaces\RapChieuRepositoryInterface;
+use Exception;
 
 class RapChieuService
 {
@@ -16,7 +17,8 @@ class RapChieuService
 
     public function getAllRapChieu()
     {
-        return $this->rapChieuRepository->getAll();
+        return $this->rapChieuRepository
+            ->getByOwner(auth()->id());
     }
 
     public function getRapChieuById($id)
@@ -26,16 +28,58 @@ class RapChieuService
 
     public function createRapChieu(array $data)
     {
-        return $this->rapChieuRepository->create($data);
+        $data['maNguoiDung']
+            = auth()->id();
+
+        return $this->rapChieuRepository
+            ->create($data);
     }
 
     public function updateRapChieu($id, array $data)
     {
-        return $this->rapChieuRepository->update($id, $data);
+        $rap = $this->rapChieuRepository
+            ->getById($id);
+
+        if (!$rap) {
+            throw new Exception(
+                'Rạp không tồn tại'
+            );
+        }
+
+        if (
+            $rap->maNguoiDung
+            != auth()->id()
+        ) {
+            throw new Exception(
+                'Không có quyền'
+            );
+        }
+
+        return $this->rapChieuRepository
+            ->update($id, $data);
     }
 
     public function deleteRapChieu($id)
     {
-        return $this->rapChieuRepository->delete($id);
+        $rap = $this->rapChieuRepository
+            ->getById($id);
+
+        if (!$rap) {
+            throw new Exception(
+                'Rạp không tồn tại'
+            );
+        }
+
+        if (
+            $rap->maNguoiDung
+            != auth()->id()
+        ) {
+            throw new Exception(
+                'Không có quyền'
+            );
+        }
+
+        return $this->rapChieuRepository
+            ->delete($id);
     }
 }
