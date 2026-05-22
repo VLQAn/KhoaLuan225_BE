@@ -25,6 +25,12 @@ return new class extends Migration
 
             $table->text('moTa')->nullable();
 
+            $table->enum('trangThai', [
+                'DANG_BAN',
+                'HET_BAN_TRONG_NGAY',
+                'NGUNG_KINH_DOANH'
+            ])->default('DANG_BAN');
+
             $table->timestamps();
         });
     }

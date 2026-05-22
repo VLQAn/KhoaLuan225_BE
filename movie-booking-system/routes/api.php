@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\PhongChieuController;
 use App\Http\Controllers\Api\GheController;
 use App\Http\Controllers\Api\XuatChieuController;
 use App\Http\Controllers\Api\BapNuocController;
+use App\Http\Controllers\Api\GiaVeController;
 
 /*
 |--------------------------------------------------------------------------
@@ -146,5 +147,20 @@ Route::middleware('auth:sanctum')
         Route::apiResource(
             'bap-nuoc',
             BapNuocController::class
+        );
+    });
+
+/*
+|--------------------------------------------------------------------------
+| Gia Ve
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware('auth:sanctum')
+    ->group(function () {
+
+        Route::apiResource(
+            'gia-ve',
+            GiaVeController::class
         );
     });
