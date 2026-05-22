@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\GheController;
 use App\Http\Controllers\Api\XuatChieuController;
 use App\Http\Controllers\Api\BapNuocController;
 use App\Http\Controllers\Api\GiaVeController;
+use App\Http\Controllers\Api\KhuyenMaiController;
 
 /*
 |--------------------------------------------------------------------------
@@ -162,5 +163,19 @@ Route::middleware('auth:sanctum')
         Route::apiResource(
             'gia-ve',
             GiaVeController::class
+        );
+    });
+
+/*
+|-------------------------------------------------------------------------- 
+| Khuyen Mai
+|-------------------------------------------------------------------------- 
+*/
+Route::middleware('auth:sanctum')
+    ->group(function () {
+
+        Route::apiResource(
+            'khuyen-mai',
+            KhuyenMaiController::class
         );
     });

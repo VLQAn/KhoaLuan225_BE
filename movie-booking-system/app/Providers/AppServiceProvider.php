@@ -21,6 +21,8 @@ use App\Repositories\Eloquent\BapNuocRepository;
 use App\Repositories\Interfaces\BapNuocRepositoryInterface;
 use App\Repositories\Eloquent\GiaVeRepository;
 use App\Repositories\Interfaces\GiaVeRepositoryInterface;
+use App\Repositories\Eloquent\KhuyenMaiRepository;
+use App\Repositories\Interfaces\KhuyenMaiRepositoryInterface;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -38,6 +40,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(XuatChieuRepositoryInterface::class, XuatChieuRepository::class);
         $this->app->bind(BapNuocRepositoryInterface::class, BapNuocRepository::class);
         $this->app->bind(GiaVeRepositoryInterface::class, GiaVeRepository::class);
+        $this->app->bind(KhuyenMaiRepositoryInterface::class, KhuyenMaiRepository::class);
     }
     
     /**
