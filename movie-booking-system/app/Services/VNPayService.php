@@ -24,65 +24,88 @@ class VNPayService
 
         $inputData = [
 
-            'vnp_Version' => '2.1.0',
+            "vnp_Version" => "2.1.0",
 
-            'vnp_TmnCode' => $vnp_TmnCode,
+            "vnp_TmnCode" => $vnp_TmnCode,
 
-            'vnp_Amount' =>
-                $hoaDon->tongTien * 100,
+            "vnp_Amount" =>
+            $hoaDon->tongThanhToan * 100,
 
-            'vnp_Command' => 'pay',
+            "vnp_Command" => "pay",
 
-            'vnp_CreateDate' =>
-                date('YmdHis'),
+            "vnp_CreateDate" =>
+            date('YmdHis'),
 
-            'vnp_CurrCode' => 'VND',
+            "vnp_CurrCode" => "VND",
 
-            'vnp_IpAddr' =>
-                (string) request()->ip(),
+            "vnp_IpAddr" =>
+            '127.0.0.1',
 
-            'vnp_Locale' => 'vn',
+            "vnp_Locale" => "vn",
 
-            'vnp_OrderInfo' =>
-                'Thanh toan ve xem phim',
+            "vnp_OrderInfo" =>
+            "Thanh toan ve xem phim",
 
-            'vnp_OrderType' =>
-                'billpayment',
+            "vnp_OrderType" =>
+            "billpayment",
 
-            'vnp_ReturnUrl' =>
-                $vnp_Returnurl,
+            "vnp_ReturnUrl" =>
+            $vnp_Returnurl,
 
-            'vnp_TxnRef' =>
-                $hoaDon->maHoaDon
+            "vnp_TxnRef" =>
+            (string) $hoaDon->maHoaDon
         ];
 
         ksort($inputData);
 
-        $query =
-            http_build_query(
-                $inputData
-            );
+        $query = "";
+        $hashdata = "";
 
-        $hashData =
-            urldecode($query);
+        $i = 0;
 
-        $vnpSecureHash =
-            hash_hmac(
-                'sha512',
-                $hashData,
-                $vnp_HashSecret
-            );
+        foreach (
+            $inputData
+            as $key => $value
+        ) {
 
-        $paymentUrl =
-            $vnp_Url
-            . '?'
+            if ($i == 1) {
+
+                $hashdata .= '&'
+                    . urlencode($key)
+                    . "="
+                    . urlencode($value);
+            } else {
+
+                $hashdata .= urlencode($key)
+                    . "="
+                    . urlencode($value);
+
+                $i = 1;
+            }
+
+            $query .= urlencode($key)
+                . "="
+                . urlencode($value)
+                . '&';
+        }
+
+        $query = rtrim($query, '&');
+
+        $vnpSecureHash = hash_hmac(
+            'sha512',
+            $hashdata,
+            $vnp_HashSecret
+        );
+
+        $paymentUrl = $vnp_Url
+            . "?"
             . $query
             . '&vnp_SecureHash='
             . $vnpSecureHash;
 
         return response()->json([
             'payment_url'
-                => $paymentUrl
+            => $paymentUrl
         ]);
     }
 
@@ -109,10 +132,38 @@ class VNPayService
 
         ksort($data);
 
-        $hashData =
-            urldecode(
-                http_build_query($data)
-            );
+        $hashData = "";
+
+        $i = 0;
+
+        foreach (
+            $data
+            as $key => $value
+        ) {
+
+            if (
+                str_starts_with(
+                    $key,
+                    'vnp_'
+                )
+            ) {
+
+                if ($i == 1) {
+
+                    $hashData .= '&'
+                        . urlencode($key)
+                        . "="
+                        . urlencode($value);
+                } else {
+
+                    $hashData .= urlencode($key)
+                        . "="
+                        . urlencode($value);
+
+                    $i = 1;
+                }
+            }
+        }
 
         $calculatedHash =
             hash_hmac(

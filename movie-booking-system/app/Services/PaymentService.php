@@ -7,8 +7,6 @@ use App\Models\Ve;
 use App\Models\HoaDon;
 use App\Models\ThanhToan;
 use Illuminate\Support\Facades\DB;
-use App\Services\VNPayService;
-use App\Services\MoMoService;
 
 class PaymentService
 {
@@ -34,8 +32,13 @@ class PaymentService
             $maHoaDon
         );
 
+        /**
+         * Chỉ cho thanh toán
+         * khi đang thanh toán
+         */
         if (
-            $hoaDon->trangThai !== 'Dang_Thanh_Toan'
+            $hoaDon->trangThai
+            !== 'Dang_Thanh_Toan'
         ) {
             throw new Exception(
                 'Hóa đơn không hợp lệ'
@@ -56,6 +59,9 @@ class PaymentService
         return DB::transaction(function ()
         use ($data) {
 
+            /**
+             * Verify signature
+             */
             $isValid = $this->vnpayService
                 ->verifyPayment($data);
 
@@ -65,8 +71,15 @@ class PaymentService
                 );
             }
 
-            $maHoaDon = $data['vnp_TxnRef'];
+            /**
+             * Lấy hóa đơn
+             */
+            $maHoaDon =
+                $data['vnp_TxnRef'];
 
+            /**
+             * Lock invoice
+             */
             $hoaDon = HoaDon::where(
                 'maHoaDon',
                 $maHoaDon
@@ -78,8 +91,10 @@ class PaymentService
              * Already paid
              */
             if (
-                $hoaDon->trangThai === 'paid'
+                $hoaDon->trangThai
+                === 'Da_Thanh_Toan'
             ) {
+
                 return response()->json([
                     'message' =>
                         'Hóa đơn đã thanh toán'
@@ -95,8 +110,9 @@ class PaymentService
             ) {
 
                 ThanhToan::create([
-                    'maHoaDon' =>
-                        $hoaDon->maHoaDon,
+
+                    'maHoaDon'
+                        => $hoaDon->maHoaDon,
 
                     'phuongThucThanhToan'
                         => 'vnpay',
@@ -104,8 +120,38 @@ class PaymentService
                     'trangThai'
                         => 'failed',
 
+                    'maGiaoDich'
+                        => $data[
+                            'vnp_TransactionNo'
+                        ] ?? null,
+
+                    'soTien'
+                        => $hoaDon->tongThanhToan,
+
+                    'duLieuPhanHoi'
+                        => json_encode($data),
+
                     'gioThanhToan'
                         => now()
+                ]);
+
+                /**
+                 * Update invoice
+                 */
+                $hoaDon->update([
+                    'trangThai'
+                        => 'Da_Huy'
+                ]);
+
+                /**
+                 * Release seats
+                 */
+                Ve::where(
+                    'maHoaDon',
+                    $hoaDon->maHoaDon
+                )->update([
+                    'trangThai'
+                        => 'expired'
                 ]);
 
                 return response()->json([
@@ -118,8 +164,12 @@ class PaymentService
              * Update invoice
              */
             $hoaDon->update([
-                'trangThai' => 'paid',
-                'gioThanhToan' => now()
+
+                'trangThai'
+                    => 'Da_Thanh_Toan',
+
+                'gioThanhToan'
+                    => now()
             ]);
 
             /**
@@ -129,21 +179,34 @@ class PaymentService
                 'maHoaDon',
                 $hoaDon->maHoaDon
             )->update([
-                'trangThai' => 'paid'
+                'trangThai'
+                    => 'paid'
             ]);
 
             /**
              * Create payment
              */
             ThanhToan::create([
-                'maHoaDon' =>
-                    $hoaDon->maHoaDon,
+
+                'maHoaDon'
+                    => $hoaDon->maHoaDon,
 
                 'phuongThucThanhToan'
                     => 'vnpay',
 
                 'trangThai'
                     => 'success',
+
+                'maGiaoDich'
+                    => $data[
+                        'vnp_TransactionNo'
+                    ] ?? null,
+
+                'soTien'
+                    => $hoaDon->tongThanhToan,
+
+                'duLieuPhanHoi'
+                    => json_encode($data),
 
                 'gioThanhToan'
                     => now()
@@ -168,7 +231,8 @@ class PaymentService
         );
 
         if (
-            $hoaDon->trangThai !== 'Dang_Thanh_Toan'
+            $hoaDon->trangThai
+            !== 'Dang_Thanh_Toan'
         ) {
             throw new Exception(
                 'Hóa đơn không hợp lệ'
@@ -189,6 +253,9 @@ class PaymentService
         return DB::transaction(function ()
         use ($data) {
 
+            /**
+             * Verify signature
+             */
             $isValid = $this->momoService
                 ->verifySignature($data);
 
@@ -198,11 +265,12 @@ class PaymentService
                 );
             }
 
-            $maHoaDon = $data['orderId'];
-
+            /**
+             * Find invoice
+             */
             $hoaDon = HoaDon::where(
                 'maHoaDon',
-                $maHoaDon
+                $data['orderId']
             )
             ->lockForUpdate()
             ->firstOrFail();
@@ -211,8 +279,10 @@ class PaymentService
              * Already paid
              */
             if (
-                $hoaDon->trangThai === 'paid'
+                $hoaDon->trangThai
+                === 'Da_Thanh_Toan'
             ) {
+
                 return response()->json([
                     'message' =>
                         'Hóa đơn đã thanh toán'
@@ -227,6 +297,7 @@ class PaymentService
             ) {
 
                 ThanhToan::create([
+
                     'maHoaDon'
                         => $hoaDon->maHoaDon,
 
@@ -236,8 +307,32 @@ class PaymentService
                     'trangThai'
                         => 'failed',
 
+                    'maGiaoDich'
+                        => $data[
+                            'transId'
+                        ] ?? null,
+
+                    'soTien'
+                        => $hoaDon->tongThanhToan,
+
+                    'duLieuPhanHoi'
+                        => json_encode($data),
+
                     'gioThanhToan'
                         => now()
+                ]);
+
+                $hoaDon->update([
+                    'trangThai'
+                        => 'Da_Huy'
+                ]);
+
+                Ve::where(
+                    'maHoaDon',
+                    $hoaDon->maHoaDon
+                )->update([
+                    'trangThai'
+                        => 'expired'
                 ]);
 
                 return response()->json([
@@ -250,24 +345,30 @@ class PaymentService
              * Update invoice
              */
             $hoaDon->update([
-                'trangThai' => 'paid',
-                'gioThanhToan' => now()
+
+                'trangThai'
+                    => 'Da_Thanh_Toan',
+
+                'gioThanhToan'
+                    => now()
             ]);
 
             /**
-             * Update ticket
+             * Update tickets
              */
             Ve::where(
                 'maHoaDon',
                 $hoaDon->maHoaDon
             )->update([
-                'trangThai' => 'paid'
+                'trangThai'
+                    => 'paid'
             ]);
 
             /**
              * Create payment
              */
             ThanhToan::create([
+
                 'maHoaDon'
                     => $hoaDon->maHoaDon,
 
@@ -276,6 +377,17 @@ class PaymentService
 
                 'trangThai'
                     => 'success',
+
+                'maGiaoDich'
+                    => $data[
+                        'transId'
+                    ] ?? null,
+
+                'soTien'
+                    => $hoaDon->tongThanhToan,
+
+                'duLieuPhanHoi'
+                    => json_encode($data),
 
                 'gioThanhToan'
                     => now()
