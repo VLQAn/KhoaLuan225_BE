@@ -25,13 +25,13 @@ class DatVeController extends Controller
 
         $data =
             $this->datVeService
-                ->datVe(
-                    $request->validated()
-                );
+            ->datVe(
+                $request->validated()
+            );
 
         return response()->json([
             'message' =>
-                'Đặt vé thành công',
+            'Đặt vé thành công',
 
             'data' => $data
         ]);

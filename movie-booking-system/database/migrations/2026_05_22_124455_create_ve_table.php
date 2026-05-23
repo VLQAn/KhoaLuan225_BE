@@ -28,7 +28,9 @@ return new class extends Migration
 
             $table->decimal('gia', 10, 2);
 
-            $table->enum('trangThai', ['Dang_chon', 'Da_Dat'])->default('Dang_chọn');
+            $table->enum('trangThai', ['Dang_Chon', 'Da_Dat', 'Het_Gio'])->default('Dang_Chon');
+
+            $table->timestamp('thoiHanGiuGhe')->nullable();
 
             $table->timestamps();
 
