@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\BapNuocController;
 use App\Http\Controllers\Api\GiaVeController;
 use App\Http\Controllers\Api\KhuyenMaiController;
 use App\Http\Controllers\Api\DatVeController;
+use App\Http\Controllers\Api\PaymentController;
 
 /*
 |--------------------------------------------------------------------------
@@ -192,5 +193,46 @@ Route::middleware('auth:sanctum')
         Route::post(
             'dat-ve',
             [DatVeController::class, 'store']
+        );
+    });
+
+/*
+|--------------------------------------------------------------------------
+| Payments
+|--------------------------------------------------------------------------
+*/
+Route::prefix('payments')
+    ->group(function () {
+
+        Route::post(
+            'vnpay/{maHoaDon}',
+            [
+                PaymentController::class,
+                'createVNPayPayment'
+            ]
+        );
+
+        Route::get(
+            'vnpay-return',
+            [
+                PaymentController::class,
+                'vnpayReturn'
+            ]
+        );
+
+        Route::post(
+            'momo/{maHoaDon}',
+            [
+                PaymentController::class,
+                'createMoMoPayment'
+            ]
+        );
+
+        Route::post(
+            'momo-ipn',
+            [
+                PaymentController::class,
+                'momoIPN'
+            ]
         );
     });

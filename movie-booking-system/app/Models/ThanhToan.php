@@ -4,21 +4,28 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Ve extends Model
+class ThanhToan extends Model
 {
-    protected $table = 've';
+    protected $table = 'thanh_toan';
 
-    protected $primaryKey = 'maVe';
-
-    public $timestamps = false;
+    protected $primaryKey =
+        'maThanhToan';
 
     protected $fillable = [
-        'maXuatChieu',
-        'maGiaVe',
+
         'maHoaDon',
-        'maGhe',
-        'gia',
+
+        'phuongThucThanhToan',
+
         'trangThai',
+
+        'maGiaoDich',
+
+        'soTien',
+
+        'duLieuPhanHoi',
+
+        'gioThanhToan'
     ];
 
     public function hoaDon()

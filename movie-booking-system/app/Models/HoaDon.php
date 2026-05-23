@@ -20,4 +20,12 @@ class HoaDon extends Model
         'trangThai',
         'tongThanhToan'
     ];
+
+    public function thanhToan()
+    {
+        return $this->hasOne(
+            ThanhToan::class,
+            'maHoaDon'
+        );
+    }
 }
