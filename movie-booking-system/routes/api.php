@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\MovieController;
+use App\Http\Controllers\Api\TheLoaiController;
 use App\Http\Controllers\Api\RapChieuController;
 use App\Http\Controllers\Api\PhongChieuController;
 use App\Http\Controllers\Api\GheController;
@@ -72,6 +73,19 @@ Route::middleware('auth:sanctum')
             MovieController::class
         );
     });
+
+/*
+|-------------------------------------------------------------------------- 
+| The Loai
+|--------------------------------------------------------------------------
+*/
+Route::middleware('auth:sanctum')->group(function () {
+
+    Route::resource(
+        'the-loai',
+        TheLoaiController::class
+    );
+});
 
 /*
 |--------------------------------------------------------------------------
