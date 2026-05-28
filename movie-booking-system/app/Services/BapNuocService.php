@@ -5,6 +5,8 @@ namespace App\Services;
 use App\Repositories\Interfaces\BapNuocRepositoryInterface;
 use App\Models\RapChieu;
 use Exception;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Request;
 
 class BapNuocService
 {
@@ -22,7 +24,7 @@ class BapNuocService
     public function getAllBapNuoc()
     {
         return $this->repository
-            ->getByOwner(auth()->id());
+            ->getByOwner(Auth::id());
     }
 
     public function getBapNuocById($id)
@@ -34,13 +36,12 @@ class BapNuocService
             return null;
         }
 
-        if (
-            $mon->rapChieu->maNguoiDung
-            != auth()->id()
-        ) {
-            throw new Exception(
-                'Không có quyền'
-            );
+        if (!$mon->rapChieu) {
+            throw new Exception('Không tìm thấy rạp');
+        }
+
+        if ($mon->rapChieu->maNguoiDung != Auth::id()) {
+            throw new Exception('Không có quyền');
         }
 
         return $mon;
@@ -62,7 +63,7 @@ class BapNuocService
 
         if (
             $rap->maNguoiDung
-            != auth()->id()
+            != Auth::id()
         ) {
             throw new Exception(
                 'Không có quyền'
@@ -73,32 +74,23 @@ class BapNuocService
             ->create($data);
     }
 
-    public function updateBapNuoc(
-        $id,
-        array $data
-    ) {
-        $mon = $this->repository
-            ->find($id);
+    public function updateBapNuoc($id, array $data)
+    {
+        $mon = $this->repository->find($id);
 
         if (!$mon) {
-            throw new Exception(
-                'Món không tồn tại'
-            );
+            throw new Exception('Món không tồn tại');
         }
 
-        // CHECK OWNER
-
-        if (
-            $mon->rapChieu->maNguoiDung
-            != auth()->id()
-        ) {
-            throw new Exception(
-                'Không có quyền'
-            );
+        if (!$mon->rapChieu) {
+            throw new Exception('Món không thuộc rạp nào');
         }
 
-        return $this->repository
-            ->update($id, $data);
+        if ($mon->rapChieu->maNguoiDung != Auth::id()) {
+            throw new Exception('Không có quyền');
+        }
+
+        return $this->repository->update($id, $data);
     }
 
     public function deleteBapNuoc($id)
@@ -112,10 +104,11 @@ class BapNuocService
             );
         }
 
-        if (
-            $mon->rapChieu->maNguoiDung
-            != auth()->id()
-        ) {
+        if (!$mon->rapChieu) {
+            throw new Exception('Không tìm thấy rạp');
+        }
+
+        if ($mon->rapChieu->maNguoiDung != Auth::id()) {
             throw new Exception(
                 'Không có quyền'
             );
@@ -123,5 +116,24 @@ class BapNuocService
 
         return $this->repository
             ->delete($id);
+    }
+
+    public function updateStatus($id, array $data)
+    {
+        $mon = $this->repository->find($id);
+
+        if (!$mon) {
+            throw new \Exception("Món không tồn tại");
+        }
+
+        if (!$mon->rapChieu) {
+            throw new \Exception("Không tìm thấy rạp");
+        }
+
+        if ($mon->rapChieu->maNguoiDung != Auth::id()) {
+            throw new \Exception("Không có quyền");
+        }
+
+        return $this->repository->update($id, $data);
     }
 }

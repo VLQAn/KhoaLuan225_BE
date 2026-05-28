@@ -7,6 +7,7 @@ use Illuminate\Http\JsonResponse;
 use App\Services\BapNuocService;
 use App\Http\Requests\BapNuoc\StoreBapNuocRequest;
 use App\Http\Requests\BapNuoc\UpdateBapNuocRequest;
+use Illuminate\Http\Request;
 
 class BapNuocController extends Controller
 {
@@ -75,5 +76,18 @@ class BapNuocController extends Controller
             'message' => 'Xóa món bắp nước thành công'
         ]);
     }
-}
 
+    public function updateStatus($id, Request $request): JsonResponse
+    {
+        $data = $request->validate([
+            'trangThai' => 'required|in:DANG_BAN,HET_BAN_TRONG_NGAY,NGUNG_KINH_DOANH'
+        ]);
+
+        $result = $this->bapNuocService->updateStatus($id, $data);
+
+        return response()->json([
+            'message' => 'Cập nhật trạng thái thành công',
+            'data' => $result
+        ]);
+    }
+}

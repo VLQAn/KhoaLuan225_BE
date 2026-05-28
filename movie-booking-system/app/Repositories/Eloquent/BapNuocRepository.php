@@ -60,4 +60,11 @@ class BapNuocRepository implements BapNuocRepositoryInterface
 
         return $bapNuoc->delete();
     }
+
+    public function find($id)
+    {
+        return $this->model
+            ->with('rapChieu')
+            ->find($id);
+    }
 }

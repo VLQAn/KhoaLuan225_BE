@@ -165,6 +165,11 @@ Route::middleware('auth:sanctum')
             'bap-nuoc',
             BapNuocController::class
         );
+
+        Route::put(
+            'bap-nuoc/{id}/status',
+            [BapNuocController::class, 'updateStatus']
+        );
     });
 
 /*
