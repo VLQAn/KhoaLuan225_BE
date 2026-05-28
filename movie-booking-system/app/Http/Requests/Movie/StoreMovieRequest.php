@@ -32,6 +32,10 @@ class StoreMovieRequest extends FormRequest
             'danhGia' => 'nullable|string',
             'dienVien' => 'nullable|string',
             'daoDien' => 'nullable|string',
+            'theLoai' => 'required|array',
+
+            'theLoai.*' =>
+            'exists:the_loai,maTheLoai',
             'trangThai' => 'required|in:sap_chieu,dang_chieu,ngung_chieu',
         ];
     }

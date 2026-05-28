@@ -12,7 +12,7 @@ class UpdateMovieRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -32,6 +32,8 @@ class UpdateMovieRequest extends FormRequest
             'danhGia' => 'nullable|string',
             'dienVien' => 'nullable|string',
             'daoDien' => 'nullable|string',
+            'theLoai' => 'nullable|array',
+            'theLoai.*' => 'exists:the_loai,maTheLoai',
             'trangThai' => 'required|in:sap_chieu,dang_chieu,ngung_chieu',
         ];
     }

@@ -6,7 +6,7 @@ use App\Models\Phim;
 use App\Repositories\Interfaces\MovieRepositoryInterface;
 
 class MovieRepository
-    implements MovieRepositoryInterface
+implements MovieRepositoryInterface
 {
     /**
      * Get all movies
@@ -32,7 +32,21 @@ class MovieRepository
      */
     public function create(array $data)
     {
-        return Phim::create($data);
+        // TÁCH THỂ LOẠI
+        $theLoaiIds = $data['theLoai'] ?? [];
+
+        unset($data['theLoai']);
+
+        // TẠO PHIM
+        $movie = Phim::create($data);
+
+        // SYNC THỂ LOẠI
+        $movie->theLoai()->sync(
+            $theLoaiIds
+        );
+
+        // LOAD LẠI RELATION
+        return $movie->load('theLoai');
     }
 
     /**
@@ -44,9 +58,20 @@ class MovieRepository
     ) {
         $movie = Phim::findOrFail($id);
 
+        // TÁCH THỂ LOẠI
+        $theLoaiIds = $data['theLoai'] ?? [];
+
+        unset($data['theLoai']);
+
+        // UPDATE PHIM
         $movie->update($data);
 
-        return $movie;
+        // UPDATE THỂ LOẠI
+        $movie->theLoai()->sync(
+            $theLoaiIds
+        );
+
+        return $movie->load('theLoai');
     }
 
     /**
