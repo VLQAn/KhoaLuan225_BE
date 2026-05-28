@@ -15,7 +15,7 @@ class Phim extends Model
         'tieuDe',
         'moTa',
         'thoiLuong',
-        'ngayKhoiChieu',
+        'ngayCongChieu',
         'anhPoster',
         'anhBanner',
         'danhGia',
