@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\MovieResource;
 use App\Http\Requests\Movie\StoreMovieRequest;
 use App\Http\Requests\Movie\UpdateMovieRequest;
+use Illuminate\Http\Request;
 
 class MovieController extends Controller
 {
@@ -95,6 +96,23 @@ class MovieController extends Controller
         return ApiResponse::success(
             null,
             'Movie deleted successfully'
+        );
+    }
+
+    /**
+     * Change movie status
+     */
+    public function changeStatus(Request $request, int $id)
+    {
+        $movie = $this->movieService
+            ->changeStatusMovie(
+                $id,
+                $request->trangThai
+            );
+
+        return ApiResponse::success(
+            new MovieResource($movie),
+            'Movie status updated successfully'
         );
     }
 }

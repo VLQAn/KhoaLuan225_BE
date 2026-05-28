@@ -64,4 +64,18 @@ class MovieService
         return $this->movieRepository
             ->delete($id);
     }
+
+    public function changeStatusMovie(
+        int $id,
+        string $status
+    ) {
+        $movie = $this->movieRepository
+            ->findById($id);
+
+        $movie->trangThai = $status;
+
+        $movie->save();
+
+        return $movie;
+    }
 }
