@@ -17,12 +17,26 @@ implements XuatChieuRepositoryInterface
 
     public function getAll()
     {
-        return $this->model
-            ->with([
-                'phim',
-                'phongChieu'
-            ])
+        $data = $this->model
+            ->with(['phim', 'phongChieu.rapChieu'])
             ->paginate(10);
+
+        $now = now();
+
+        $data->getCollection()->transform(function ($item) use ($now) {
+
+            if ($item->thoiGianKetThuc < $now) {
+                $item->trangThai = 'da_chieu';
+            } elseif ($item->thoiGianBatDau <= $now) {
+                $item->trangThai = 'dang_chieu';
+            } else {
+                $item->trangThai = 'sap_chieu';
+            }
+
+            return $item;
+        });
+
+        return $data;
     }
 
     public function getById($id)
@@ -30,7 +44,7 @@ implements XuatChieuRepositoryInterface
         return $this->model
             ->with([
                 'phim',
-                'phongChieu'
+                'phongChieu.rapChieu'
             ])
             ->findOrFail($id);
     }

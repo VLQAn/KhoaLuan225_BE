@@ -47,13 +47,4 @@ class XuatChieu extends Model
             'maPhong'
         );
     }
-
-    public function chiTietDatVe()
-    {
-        return $this->hasMany(
-            ChiTietDatVe::class,
-            'maXuatChieu',
-            'maXuatChieu'
-        );
-    }
 }
