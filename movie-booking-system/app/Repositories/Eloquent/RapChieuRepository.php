@@ -23,16 +23,22 @@ class RapChieuRepository implements RapChieuRepositoryInterface
 
     public function getByOwner($maNguoiDung)
     {
-        return RapChieu::where(
-            'maNguoiDung',
-            $maNguoiDung
-        )->get();
+        return RapChieu::with(
+            'phongChieu.ghe'
+        )
+            ->where(
+                'maNguoiDung',
+                $maNguoiDung
+            )
+            ->get();
     }
 
 
     public function getById($id)
     {
-        return $this->model->findOrFail($id);
+        return RapChieu::with(
+            'phongChieu.ghe'
+        )->findOrFail($id);
     }
 
     public function create(array $data)

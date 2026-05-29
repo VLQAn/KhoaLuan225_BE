@@ -31,7 +31,34 @@ class UpdateRapChieuRequest extends FormRequest
             'soDienThoai' => [
                 'required',
                 'regex:/^(0)[0-9]{9}$/'
-            ]
+            ],
+
+            'phongChieus' => 'sometimes|array',
+
+            'phongChieus.*.maPhong' =>
+            'nullable|integer',
+
+            'phongChieus.*.tenPhong' =>
+            'required|string|max:255',
+
+            'phongChieus.*.soHang' =>
+            'required|integer|min:1',
+
+            'phongChieus.*.soCot' =>
+            'required|integer|min:1',
+
+            'phongChieus.*.ghe' =>
+            'sometimes|array',
+
+            'phongChieus.*.ghe.*.maGhe' =>
+            'sometimes|integer',
+
+            'phongChieus.*.ghe.*.loaiGhe' =>
+            'sometimes|string',
+
+            'phongChieus.*.ghe.*.trangThai' =>
+            'sometimes|string',
+
         ];
     }
 }

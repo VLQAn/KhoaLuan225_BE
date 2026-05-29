@@ -99,28 +99,176 @@ class RapChieuService
 
     public function updateRapChieu($id, array $data)
     {
-        $rap = $this->rapChieuRepository
-            ->getById($id);
+        return DB::transaction(function () use ($id, $data) {
 
-        if (!$rap) {
-            throw new Exception(
-                'Rạp không tồn tại'
+            $rap = $this->rapChieuRepository
+                ->getById($id);
+
+            if (!$rap) {
+                throw new Exception(
+                    'Rạp không tồn tại'
+                );
+            }
+
+            if (
+                $rap->maNguoiDung != Auth::id()
+            ) {
+                throw new Exception(
+                    'Không có quyền'
+                );
+            }
+
+            /**
+             * Tách danh sách phòng
+             */
+            $phongChieus =
+                $data['phongChieus'] ?? [];
+
+            unset($data['phongChieus']);
+
+            /**
+             * Update thông tin rạp
+             */
+            $rap->update($data);
+
+            /**
+             * Lấy danh sách ID phòng hiện tại trong DB
+             */
+            $existingRoomIds = $rap
+                ->phongChieu
+                ->pluck('maPhong')
+                ->toArray();
+
+            /**
+             * Lấy danh sách ID phòng từ frontend
+             */
+            $clientRoomIds = collect($phongChieus)
+                ->pluck('maPhong')
+                ->filter()
+                ->toArray();
+
+            /**
+             * Tìm các phòng cần xóa
+             */
+            $roomsToDelete = array_diff(
+                $existingRoomIds,
+                $clientRoomIds
             );
-        }
 
-        if (
-            $rap->maNguoiDung
-            != Auth::id()
-        ) {
-            throw new Exception(
-                'Không có quyền'
-            );
-        }
+            /**
+             * Xóa phòng + ghế
+             */
+            foreach ($roomsToDelete as $roomId) {
 
-        return $this->rapChieuRepository
-            ->update($id, $data);
+                $room = \App\Models\PhongChieu::find($roomId);
+
+                if ($room) {
+
+                    /**
+                     * Xóa ghế trước
+                     */
+                    $room->ghe()->delete();
+
+                    /**
+                     * Xóa phòng
+                     */
+                    $room->delete();
+                }
+            }
+
+            /**
+             * Update hoặc thêm mới phòng
+             */
+            foreach ($phongChieus as $phong) {
+
+                /**
+                 * =========================
+                 * UPDATE PHÒNG
+                 * =========================
+                 */
+                if (!empty($phong['maPhong'])) {
+
+                    $room =
+                        \App\Models\PhongChieu::find(
+                            $phong['maPhong']
+                        );
+
+                    if ($room) {
+
+                        $room->update([
+                            'tenPhong' =>
+                            $phong['tenPhong']
+                        ]);
+
+                        /**
+                         * Update ghế
+                         */
+                        if (!empty($phong['ghe'])) {
+
+                            foreach (
+                                $phong['ghe']
+                                as $ghe
+                            ) {
+
+                                \App\Models\Ghe::where(
+                                    'maGhe',
+                                    $ghe['maGhe']
+                                )->update([
+
+                                    'loaiGhe' =>
+                                    $ghe['loaiGhe'],
+
+                                    'trangThai' =>
+                                    $ghe['trangThai'],
+                                ]);
+                            }
+                        }
+                    }
+                }
+
+                /**
+                 * =========================
+                 * THÊM PHÒNG MỚI
+                 * =========================
+                 */
+                else {
+
+                    $newPhong =
+                        $this->phongChieuService
+                        ->createPhongChieu([
+
+                            'maRap' => $rap->maRap,
+
+                            'tenPhong' =>
+                            $phong['tenPhong']
+                        ]);
+
+                    /**
+                     * Generate ghế mới
+                     */
+                    $this->gheService
+                        ->generateSeats([
+
+                            'maPhong' =>
+                            $newPhong->maPhong,
+
+                            'soHang' =>
+                            $phong['soHang'],
+
+                            'soCot' =>
+                            $phong['soCot'],
+                        ]);
+                }
+            }
+
+            /**
+             * Trả dữ liệu mới nhất
+             */
+            return $this->rapChieuRepository
+                ->getById($id);
+        });
     }
-
+    
     public function deleteRapChieu($id)
     {
         $rap = $this->rapChieuRepository
