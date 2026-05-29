@@ -14,6 +14,7 @@ class RapChieu extends Model
     protected $fillable = [
         'maNguoiDung',
         'tenRap',
+        'soDienThoai',
         'diaChi',
     ];
 

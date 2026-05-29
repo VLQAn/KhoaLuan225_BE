@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Repositories\Interfaces\RapChieuRepositoryInterface;
 use Exception;
+use Illuminate\Support\Facades\Auth;
 
 class RapChieuService
 {
@@ -18,7 +19,7 @@ class RapChieuService
     public function getAllRapChieu()
     {
         return $this->rapChieuRepository
-            ->getByOwner(auth()->id());
+            ->getByOwner(Auth::id());
     }
 
     public function getRapChieuById($id)
@@ -29,7 +30,7 @@ class RapChieuService
     public function createRapChieu(array $data)
     {
         $data['maNguoiDung']
-            = auth()->id();
+            = Auth::id();
 
         return $this->rapChieuRepository
             ->create($data);
@@ -48,7 +49,7 @@ class RapChieuService
 
         if (
             $rap->maNguoiDung
-            != auth()->id()
+            != Auth::id()
         ) {
             throw new Exception(
                 'Không có quyền'
@@ -72,7 +73,7 @@ class RapChieuService
 
         if (
             $rap->maNguoiDung
-            != auth()->id()
+            != Auth::id()
         ) {
             throw new Exception(
                 'Không có quyền'

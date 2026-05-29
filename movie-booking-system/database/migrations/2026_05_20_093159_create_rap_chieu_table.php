@@ -17,6 +17,8 @@ return new class extends Migration
             $table->string('tenRap', 255);
 
             $table->string('diaChi');
+
+            $table->string('soDienThoai', 10);
             
             $table->timestamps();
         });
