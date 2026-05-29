@@ -23,7 +23,7 @@ class StoreRapChieuRequest extends FormRequest
     public function rules(): array
     {
         return [
-           
+
             'tenRap' => 'required|string|max:255',
 
             'diaChi' => 'required|string|max:500',
@@ -31,7 +31,19 @@ class StoreRapChieuRequest extends FormRequest
             'soDienThoai' => [
                 'required',
                 'regex:/^(0)[0-9]{9}$/'
-            ]
+            ],
+
+            'phongChieus' => 'required|array|min:1',
+
+            'phongChieus.*.tenPhong'
+            => 'required|string|max:255',
+
+            'phongChieus.*.soHang'
+            => 'required|integer|min:1|max:26',
+
+            'phongChieus.*.soCot'
+            => 'required|integer|min:1|max:30',
+
         ];
     }
 }
