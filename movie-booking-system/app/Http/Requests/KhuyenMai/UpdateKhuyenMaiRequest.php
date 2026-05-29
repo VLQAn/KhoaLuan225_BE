@@ -7,19 +7,26 @@ use Illuminate\Validation\Rule;
 class UpdateKhuyenMaiRequest
 extends StoreKhuyenMaiRequest
 {
+    public function authorize(): bool
+    {
+        return true;
+    }
+
     public function rules(): array
     {
-        $rules = parent::rules();
+        $id = $this->route('khuyen_mai');
 
-        $rules['noiDung'] =
-            'required|string|max:255';
+        $idValue = is_object($id) ? $id->maKhuyenMai : $id;
 
-        $rules['giaKhuyenMai'] =
-            'required|numeric|min:0';
-            
-        $rules['thoiHan'] =
-            'required|date|after:now';
-
-        return $rules;
+        return [
+            'noiDung' => 'required|string|max:255',
+            'maCode' => [
+                'required',
+                Rule::unique('khuyen_mai', 'maCode')->ignore($idValue, 'maKhuyenMai'),
+            ],
+            'giaKhuyenMai' => 'required|numeric|min:0|max:100',
+            'ngayBatDau' => 'required|date',
+            'thoiHan' => 'required|date|after_or_equal:ngayBatDau',
+        ];
     }
 }

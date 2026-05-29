@@ -16,4 +16,6 @@ interface KhuyenMaiRepositoryInterface
     );
 
     public function delete($id);
+
+    public function query();
 }

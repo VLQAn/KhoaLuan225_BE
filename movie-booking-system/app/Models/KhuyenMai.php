@@ -8,12 +8,19 @@ class KhuyenMai extends Model
 {
     protected $table = 'khuyen_mai';
 
-    protected $primaryKey =
-        'maKhuyenMai';
+    protected $primaryKey = 'maKhuyenMai';
 
     protected $fillable = [
+        'maNguoiDung',
         'noiDung',
+        'maCode',
         'giaKhuyenMai',
+        'ngayBatDau',
         'thoiHan',
     ];
+
+    public function nguoiDung()
+    {
+        return $this->belongsTo(NguoiDung::class, 'maNguoiDung');
+    }
 }

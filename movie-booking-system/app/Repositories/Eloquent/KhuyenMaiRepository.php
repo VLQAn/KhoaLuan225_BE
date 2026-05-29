@@ -40,4 +40,9 @@ implements KhuyenMaiRepositoryInterface
     {
         return KhuyenMai::destroy($id);
     }
+
+    public function query()
+    {
+        return KhuyenMai::query();
+    }
 }

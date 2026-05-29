@@ -16,17 +16,11 @@ extends FormRequest
     public function rules(): array
     {
         return [
-            'maRap' =>
-                'required|exists:rap_chieu,maRap',
-                
-            'noiDung' =>
-                'required|string|max:255',
-
-            'giaKhuyenMai' =>
-                'required|numeric|min:0',
-                
-            'thoiHan' =>
-                'required|date|after:now',
+            'noiDung' => 'required|string|max:255',
+            'maCode' => 'required|string|unique:khuyen_mai,maCode',
+            'giaKhuyenMai' => 'required|numeric|min:0|max:100',
+            'ngayBatDau' => 'required|date',
+            'thoiHan' => 'required|date|after_or_equal:ngayBatDau',
         ];
     }
 }

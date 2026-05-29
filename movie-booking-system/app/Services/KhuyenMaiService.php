@@ -6,6 +6,7 @@ use Exception;
 use App\Models\RapChieu;
 
 use App\Repositories\Interfaces\KhuyenMaiRepositoryInterface;
+use Illuminate\Support\Facades\Auth;
 
 class KhuyenMaiService
 {
@@ -22,7 +23,9 @@ class KhuyenMaiService
     public function getAllKhuyenMai()
     {
         return $this->khuyenMaiRepository
-            ->getAll();
+            ->query()
+            ->where('maNguoiDung', Auth::id())
+            ->get();
     }
 
     public function getKhuyenMaiById($id)
@@ -31,69 +34,32 @@ class KhuyenMaiService
             ->findById($id);
     }
 
-    public function createKhuyenMai(
-        array $data
-    ) {
+    public function createKhuyenMai(array $data)
+    {
+        $data['maNguoiDung'] = Auth::id();
 
-        $rap = RapChieu::find(
-            $data['maRap']
-        );
-
-        if (
-            $rap->maNguoiDung
-            != auth()->id()
-        ) {
-            throw new Exception(
-                'Không có quyền'
-            );
-        }
-
-        return $this->khuyenMaiRepository
-            ->create($data);
+        return $this->khuyenMaiRepository->create($data);
     }
 
-    public function updateKhuyenMai(
-        $id,
-        array $data
-    ) {
+    public function updateKhuyenMai($id, array $data)
+    {
+        $km = $this->khuyenMaiRepository->findById($id);
 
-        $khuyenMai =
-            $this->khuyenMaiRepository
-                ->findById($id);
-
-        if (
-            $khuyenMai->rapChieu
-                ->maNguoiDung
-            != auth()->id()
-        ) {
-            throw new Exception(
-                'Không có quyền'
-            );
+        if ($km->maNguoiDung !== Auth::id()) {
+            throw new Exception("Không có quyền");
         }
 
-        return $this->khuyenMaiRepository
-            ->update($id, $data);
+        return $this->khuyenMaiRepository->update($id, $data);
     }
 
-    public function deleteKhuyenMai(
-        $id
-    ) {
+    public function deleteKhuyenMai($id)
+    {
+        $km = $this->khuyenMaiRepository->findById($id);
 
-        $khuyenMai =
-            $this->khuyenMaiRepository
-                ->findById($id);
-
-        if (
-            $khuyenMai->rapChieu
-                ->maNguoiDung
-            != auth()->id()
-        ) {
-            throw new Exception(
-                'Không có quyền'
-            );
+        if ($km->maNguoiDung !== Auth::id()) {
+            throw new Exception("Không có quyền");
         }
 
-        return $this->khuyenMaiRepository
-            ->delete($id);
+        return $this->khuyenMaiRepository->delete($id);
     }
 }

@@ -14,13 +14,22 @@ return new class extends Migration
         Schema::create('khuyen_mai', function (Blueprint $table) {
             $table->id('maKhuyenMai');
 
+            $table->unsignedBigInteger('maNguoiDung');
+
             $table->string('noiDung');
+            $table->string('maCode')->unique();
 
             $table->decimal('giaKhuyenMai', 5, 2);
 
+            $table->date('ngayBatDau');
             $table->dateTime('thoiHan');
-            
+
             $table->timestamps();
+
+            $table->foreign('maNguoiDung')
+                ->references('maNguoiDung')
+                ->on('nguoi_dung')
+                ->onDelete('cascade');
         });
     }
 
