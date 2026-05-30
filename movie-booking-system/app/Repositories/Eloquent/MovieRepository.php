@@ -15,7 +15,7 @@ implements MovieRepositoryInterface
     {
         return Phim::with('theLoai')
             ->latest()
-            ->paginate(10);
+            ->get();
     }
 
     /**
