@@ -75,6 +75,11 @@ Route::middleware('auth:sanctum')
         );
     });
 
+Route::apiResource(
+    'movies',
+    MovieController::class
+)->only(['index', 'show']);
+
 /*
 |-------------------------------------------------------------------------- 
 | The Loai

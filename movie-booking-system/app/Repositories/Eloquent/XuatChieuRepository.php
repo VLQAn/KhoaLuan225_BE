@@ -19,7 +19,7 @@ implements XuatChieuRepositoryInterface
     {
         $data = $this->model
             ->with(['phim', 'phongChieu.rapChieu'])
-            ->paginate(10);
+            ->paginate(20);
 
         $now = now();
 
