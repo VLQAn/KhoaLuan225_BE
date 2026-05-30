@@ -28,4 +28,22 @@ class HoaDon extends Model
             'maHoaDon'
         );
     }
+
+    public function ves()
+    {
+        return $this->hasMany(
+            Ve::class,
+            'maHoaDon',
+            'maHoaDon'
+        );
+    }
+
+    public function khuyenMai()
+    {
+        return $this->belongsTo(
+            KhuyenMai::class,
+            'maKhuyenMai',
+            'maKhuyenMai'
+        );
+    }
 }

@@ -28,4 +28,22 @@ class Ve extends Model
             'maHoaDon'
         );
     }
+
+    public function ghe()
+    {
+        return $this->belongsTo(
+            Ghe::class,
+            'maGhe',
+            'maGhe'
+        );
+    }
+
+    public function xuatChieu()
+    {
+        return $this->belongsTo(
+            XuatChieu::class,
+            'maXuatChieu',
+            'maXuatChieu'
+        );
+    }
 }

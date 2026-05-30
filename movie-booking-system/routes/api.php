@@ -13,6 +13,7 @@ use App\Http\Controllers\Api\GiaVeController;
 use App\Http\Controllers\Api\KhuyenMaiController;
 use App\Http\Controllers\Api\DatVeController;
 use App\Http\Controllers\Api\PaymentController;
+use App\Http\Controllers\Api\BookingManagementController;
 
 /*
 |--------------------------------------------------------------------------
@@ -252,6 +253,23 @@ Route::prefix('payments')
             [
                 PaymentController::class,
                 'momoIPN'
+            ]
+        );
+    });
+
+/*
+|-------------------------------------------------------------------------- 
+| Dơn đặt vé
+|-------------------------------------------------------------------------- 
+*/
+Route::middleware('auth:sanctum')
+    ->group(function () {
+
+        Route::get(
+            '/admin/bookings',
+            [
+                BookingManagementController::class,
+                'index'
             ]
         );
     });

@@ -9,6 +9,7 @@ use App\Models\HoaDon;
 use App\Models\Ghe;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 use Exception;
 
 class DatVeService
@@ -141,7 +142,7 @@ class DatVeService
             $hoaDon = HoaDon::create([
 
                 'maNguoiDung' =>
-                auth()->id(),
+                Auth::id(),
 
                 'maKhuyenMai' =>
                 $data['maKhuyenMai']
