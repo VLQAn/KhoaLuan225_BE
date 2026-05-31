@@ -153,6 +153,11 @@ Route::get(
     [XuatChieuController::class, 'available']
 );
 
+Route::get(
+    '/xuat-chieu/{maXuatChieu}/seats',
+    [XuatChieuController::class, 'seatMap']
+);
+
 Route::middleware('auth:sanctum')
     ->group(function () {
 

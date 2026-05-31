@@ -82,4 +82,12 @@ class XuatChieuController extends Controller
                 ->getAvailableShowtimes()
         );
     }
+
+    public function seatMap($maXuatChieu)
+    {
+        return response()->json(
+            $this->xuatChieuService
+                ->getSeatMap($maXuatChieu)
+        );
+    }
 }

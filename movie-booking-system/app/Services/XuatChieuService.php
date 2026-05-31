@@ -4,6 +4,8 @@ namespace App\Services;
 
 use App\Models\Phim;
 use App\Models\XuatChieu;
+use App\Models\Ve;
+use App\Models\Ghe;
 use App\Repositories\Interfaces\XuatChieuRepositoryInterface;
 use Carbon\Carbon;
 use Exception;
@@ -239,5 +241,65 @@ class XuatChieuService
         return $this
             ->xuatChieuRepository
             ->getAvailableShowtimes();
+    }
+
+    public function getSeatMap(
+        int $maXuatChieu
+    ) {
+        $xuatChieu =
+            XuatChieu::findOrFail(
+                $maXuatChieu
+            );
+
+        $allSeats =
+            Ghe::where(
+                'maPhong',
+                $xuatChieu->maPhong
+            )
+            ->get();
+
+        $bookedSeats =
+            Ve::where(
+                'maXuatChieu',
+                $maXuatChieu
+            )
+            ->pluck('maGhe')
+            ->toArray();
+
+        return [
+
+            'maPhong' =>
+            $xuatChieu->maPhong,
+
+            'seats' =>
+            $allSeats->map(function ($ghe)
+            use ($bookedSeats) {
+
+                return [
+
+                    'maGhe' =>
+                    $ghe->maGhe,
+
+                    'hangGhe' =>
+                    $ghe->hangGhe,
+
+                    'soGhe' =>
+                    $ghe->soGhe,
+
+                    'tenGhe' =>
+                    $ghe->hangGhe .
+                        $ghe->soGhe,
+
+                    'loaiGhe' =>
+                    $ghe->loaiGhe,
+
+                    'daDat' =>
+                    in_array(
+                        $ghe->maGhe,
+                        $bookedSeats
+                    )
+                ];
+            })
+        ];
     }
 }
