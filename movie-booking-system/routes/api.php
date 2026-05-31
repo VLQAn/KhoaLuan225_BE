@@ -148,6 +148,10 @@ Route::middleware('auth:sanctum')
 | Xuat Chieu
 |--------------------------------------------------------------------------
 */
+Route::get(
+    '/xuat-chieu/available',
+    [XuatChieuController::class, 'available']
+);
 
 Route::middleware('auth:sanctum')
     ->group(function () {

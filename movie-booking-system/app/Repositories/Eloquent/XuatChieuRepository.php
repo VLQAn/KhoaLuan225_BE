@@ -106,4 +106,18 @@ implements XuatChieuRepositoryInterface
 
         return $query->exists();
     }
+
+    public function getAvailableShowtimes()
+    {
+        return XuatChieu::where(
+            'thoiGianBatDau',
+            '>',
+            now()
+        )
+            ->with([
+                'phongChieu.rapChieu',
+                'phim'
+            ])
+            ->get();
+    }
 }

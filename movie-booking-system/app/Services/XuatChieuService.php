@@ -233,4 +233,11 @@ class XuatChieuService
                 ]);
         });
     }
+
+    public function getAvailableShowtimes()
+    {
+        return $this
+            ->xuatChieuRepository
+            ->getAvailableShowtimes();
+    }
 }

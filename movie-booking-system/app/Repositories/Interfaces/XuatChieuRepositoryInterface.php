@@ -20,4 +20,6 @@ interface XuatChieuRepositoryInterface
         string $endTime,
         ?int $ignoreId = null
     );
+
+    public function getAvailableShowtimes();
 }

@@ -74,4 +74,12 @@ class XuatChieuController extends Controller
             'message' => 'Xóa xuất chiếu thành công'
         ]);
     }
+
+    public function available()
+    {
+        return response()->json(
+            $this->xuatChieuService
+                ->getAvailableShowtimes()
+        );
+    }
 }
