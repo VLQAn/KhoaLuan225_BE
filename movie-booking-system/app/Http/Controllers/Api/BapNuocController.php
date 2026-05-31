@@ -7,6 +7,7 @@ use Illuminate\Http\JsonResponse;
 use App\Services\BapNuocService;
 use App\Http\Requests\BapNuoc\StoreBapNuocRequest;
 use App\Http\Requests\BapNuoc\UpdateBapNuocRequest;
+use App\Models\BapNuoc;
 use Illuminate\Http\Request;
 
 class BapNuocController extends Controller
@@ -89,5 +90,12 @@ class BapNuocController extends Controller
             'message' => 'Cập nhật trạng thái thành công',
             'data' => $result
         ]);
+    }
+
+    public function getByRap($maRap)
+    {
+        return BapNuoc::where('maRap', $maRap)
+            ->where('trangThai', 'DANG_BAN')
+            ->get();
     }
 }

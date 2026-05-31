@@ -172,6 +172,7 @@ Route::middleware('auth:sanctum')
 | Bap Nuoc
 |--------------------------------------------------------------------------
 */
+Route::get('/bap-nuoc/by-rap/{maRap}', [BapNuocController::class, 'getByRap']);
 
 Route::middleware('auth:sanctum')
     ->group(function () {
