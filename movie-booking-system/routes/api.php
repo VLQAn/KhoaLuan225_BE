@@ -194,6 +194,19 @@ Route::middleware('auth:sanctum')
 |--------------------------------------------------------------------------
 */
 
+Route::get(
+    'gia-ve-hien-tai',
+    [GiaVeController::class, 'current']
+);
+
+Route::get(
+    'gia-ve/xuat-chieu/{maXuatChieu}',
+    [
+        GiaVeController::class,
+        'getByXuatChieu'
+    ]
+);
+
 Route::middleware('auth:sanctum')
     ->group(function () {
 

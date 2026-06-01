@@ -7,6 +7,7 @@ use App\Models\GiaVe;
 use App\Models\KhuyenMai;
 use App\Models\HoaDon;
 use App\Models\Ghe;
+use App\Models\XuatChieu;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
@@ -46,6 +47,25 @@ class DatVeService
                 }
             }
 
+            // kiểm tra xuất chiếu có tồn tại không
+
+            $xuatChieu = XuatChieu::find(
+                $data['maXuatChieu']
+            );
+
+            if (!$xuatChieu) {
+
+                throw new Exception(
+                    'Xuất chiếu không tồn tại'
+                );
+            }
+
+            // kiểm tra giờ chiếu đã bắt đầu chưa
+            $gioChieu =
+                Carbon::parse(
+                    $xuatChieu->thoiGianBatDau
+                )->format('H:i:s');
+
             // ======================
             // 2. TÍNH TIỀN
             // ======================
@@ -65,11 +85,17 @@ class DatVeService
                     );
                 }
 
-                // Tạm thời lấy giá vé đầu tiên
-                // Sau này có thể lọc theo:
-                // giờ chiếu, loại ghế, độ tuổi...
-
-                $giaVe = GiaVe::first();
+                $giaVe = GiaVe::where(
+                    'gioBatDau',
+                    '<=',
+                    $gioChieu
+                )
+                    ->where(
+                        'gioKetThuc',
+                        '>=',
+                        $gioChieu
+                    )
+                    ->first();
 
                 if (!$giaVe) {
 

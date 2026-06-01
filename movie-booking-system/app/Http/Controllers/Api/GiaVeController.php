@@ -8,6 +8,7 @@ use Illuminate\Http\JsonResponse;
 use App\Services\GiaVeService;
 use App\Http\Requests\GiaVe\StoreGiaVeRequest;
 use App\Http\Requests\GiaVe\UpdateGiaVeRequest;
+use App\Models\GiaVe;
 
 class GiaVeController extends Controller
 {
@@ -83,5 +84,27 @@ class GiaVeController extends Controller
             'message'
                 => 'Xóa giá vé thành công'
         ]);
+    }
+
+    public function current()
+    {
+        $giaVe = GiaVe::first();
+
+        return response()->json($giaVe);
+    }
+
+    public function getByXuatChieu(
+        $maXuatChieu
+    ) {
+
+        $giaVe =
+            $this->giaVeService
+                ->getGiaVeByXuatChieu(
+                    $maXuatChieu
+                );
+
+        return response()->json(
+            $giaVe
+        );
     }
 }

@@ -5,6 +5,9 @@ namespace App\Services;
 use Exception;
 use App\Models\RapChieu;
 use App\Repositories\Interfaces\GiaVeRepositoryInterface;
+use App\Models\XuatChieu;
+use App\Models\GiaVe;
+use Illuminate\Support\Facades\Auth;
 
 class GiaVeService
 {
@@ -33,7 +36,7 @@ class GiaVeService
     public function createGiaVe(array $data)
     {
         $data['maNguoiDung']
-            = auth()->id();
+            = Auth::id();
 
         return $this->giaVeRepository
             ->create($data);
@@ -48,7 +51,7 @@ class GiaVeService
 
         if (
             $giaVe->rapChieu->maNguoiDung
-            != auth()->id()
+            != Auth::id()
         ) {
             throw new Exception(
                 'Không có quyền'
@@ -66,7 +69,7 @@ class GiaVeService
 
         if (
             $giaVe->rapChieu->maNguoiDung
-            != auth()->id()
+            != Auth::id()
         ) {
             throw new Exception(
                 'Không có quyền'
@@ -75,5 +78,41 @@ class GiaVeService
 
         return $this->giaVeRepository
             ->delete($id);
+    }
+
+    public function getGiaVeByXuatChieu(
+        int $maXuatChieu
+    ) {
+
+        $xuatChieu =
+            XuatChieu::findOrFail(
+                $maXuatChieu
+            );
+
+        $gioChieu =
+            $xuatChieu
+                ->thoiGianBatDau
+                ->format('H:i:s');
+
+        $giaVe = GiaVe::where(
+                'gioBatDau',
+                '<=',
+                $gioChieu
+            )
+            ->where(
+                'gioKetThuc',
+                '>=',
+                $gioChieu
+            )
+            ->first();
+
+        if (!$giaVe) {
+
+            throw new Exception(
+                'Không tìm thấy giá vé phù hợp'
+            );
+        }
+
+        return $giaVe;
     }
 }
