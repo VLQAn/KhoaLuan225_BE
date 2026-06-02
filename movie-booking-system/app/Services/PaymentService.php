@@ -151,7 +151,7 @@ class PaymentService
                     $hoaDon->maHoaDon
                 )->update([
                     'trangThai'
-                        => 'expired'
+                        => 'Het_Gio'
                 ]);
 
                 return response()->json([
@@ -180,7 +180,7 @@ class PaymentService
                 $hoaDon->maHoaDon
             )->update([
                 'trangThai'
-                    => 'paid'
+                    => 'Da_Dat'
             ]);
 
             /**
@@ -332,7 +332,7 @@ class PaymentService
                     $hoaDon->maHoaDon
                 )->update([
                     'trangThai'
-                        => 'expired'
+                        => 'Het_Gio'
                 ]);
 
                 return response()->json([
@@ -361,7 +361,7 @@ class PaymentService
                 $hoaDon->maHoaDon
             )->update([
                 'trangThai'
-                    => 'paid'
+                    => 'Da_Dat'
             ]);
 
             /**

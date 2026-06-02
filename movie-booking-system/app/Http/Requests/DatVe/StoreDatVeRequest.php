@@ -24,16 +24,24 @@ class StoreDatVeRequest extends FormRequest
     {
         return [
             'maXuatChieu' =>
-                'required|exists:xuat_chieu,maXuatChieu',
+            'required|exists:xuat_chieu,maXuatChieu',
 
             'danhSachGhe' =>
-                'required|array|min:1',
+            'required|array|min:1',
 
             'danhSachGhe.*' =>
-                'exists:ghe,maGhe',
+            'exists:ghe,maGhe',
 
             'maKhuyenMai' =>
-                'nullable|exists:khuyen_mai,maKhuyenMai'
+            'nullable|exists:khuyen_mai,maKhuyenMai',
+
+            'danhSachMonAn' => ['nullable', 'array'],
+
+            'danhSachMonAn.*.maMon' =>
+            ['required_with:danhSachMonAn'],
+
+            'danhSachMonAn.*.soLuong' =>
+            ['required_with:danhSachMonAn']
         ];
     }
 }

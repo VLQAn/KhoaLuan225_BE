@@ -8,6 +8,8 @@ use App\Models\KhuyenMai;
 use App\Models\HoaDon;
 use App\Models\Ghe;
 use App\Models\XuatChieu;
+use App\Models\BapNuoc;
+use App\Models\HoaDonBapNuoc;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
@@ -33,7 +35,7 @@ class DatVeService
                     ->whereIn(
                         'trangThai',
                         [
-                            'Dang_chon',
+                            'Dang_Chon',
                             'Da_Dat'
                         ]
                     )
@@ -111,6 +113,34 @@ class DatVeService
                 $giaVeMap[$maGhe] = $giaVe;
             }
 
+            //=======================
+            // Tính tiền món ăn
+            //=======================
+            $tongTienDoAn = 0;
+            foreach (
+                $data['danhSachMonAn'] ?? []
+                as $item
+            ) {
+
+                $monAn =
+                    BapNuoc::find(
+                        $item['maMon']
+                    );
+
+                if (!$monAn) {
+
+                    throw new Exception(
+                        "Món ăn không tồn tại"
+                    );
+                }
+
+                $tongTienDoAn +=
+                    $monAn->gia
+                    *
+                    $item['soLuong'];
+            }
+            $tongTien += $tongTienDoAn;
+
             // ======================
             // 3. ÁP KHUYẾN MÃI
             // ======================
@@ -187,6 +217,40 @@ class DatVeService
                 'Dang_Thanh_Toan'
             ]);
 
+            //=======================
+            // Tạo chi tiết món ăn
+            //=======================
+            foreach (
+                $data['danhSachMonAn'] ?? []
+                as $item
+            ) {
+
+                $monAn =
+                    BapNuoc::find(
+                        $item['maMon']
+                    );
+
+                HoaDonBapNuoc::create([
+
+                    'maHoaDon' =>
+                    $hoaDon->maHoaDon,
+
+                    'maMon' =>
+                    $monAn->maMon,
+
+                    'soLuong' =>
+                    $item['soLuong'],
+
+                    'donGia' =>
+                    $monAn->gia,
+
+                    'thanhTien' =>
+                    $monAn->gia
+                        *
+                        $item['soLuong']
+                ]);
+            }
+
             // ======================
             // 5. TẠO VÉ
             // ======================
@@ -217,7 +281,7 @@ class DatVeService
                     $giaVe->gia,
 
                     'trangThai' =>
-                    'Dang_chon'
+                    'Dang_Chon'
                 ]);
             }
 
