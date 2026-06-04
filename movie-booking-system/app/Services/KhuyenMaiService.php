@@ -62,4 +62,27 @@ class KhuyenMaiService
 
         return $this->khuyenMaiRepository->delete($id);
     }
+
+    public function getPublicKhuyenMai()
+    {
+        return $this->khuyenMaiRepository
+            ->query()
+            ->where(
+                'thoiHan',
+                '>=',
+                now()
+            )
+            ->get();
+    }
+
+    public function getMyKhuyenMai()
+    {
+        return $this->khuyenMaiRepository
+            ->query()
+            ->where(
+                'maNguoiDung',
+                Auth::id()
+            )
+            ->get();
+    }
 }

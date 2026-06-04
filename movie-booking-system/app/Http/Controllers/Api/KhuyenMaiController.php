@@ -21,8 +21,7 @@ class KhuyenMaiController extends Controller
             = $khuyenMaiService;
     }
 
-    public function index():
-    JsonResponse
+    public function index(): JsonResponse
     {
         return response()->json(
             $this->khuyenMaiService
@@ -30,8 +29,7 @@ class KhuyenMaiController extends Controller
         );
     }
 
-    public function show($id):
-    JsonResponse
+    public function show($id): JsonResponse
     {
         return response()->json(
             $this->khuyenMaiService
@@ -46,13 +44,13 @@ class KhuyenMaiController extends Controller
 
         $data =
             $this->khuyenMaiService
-                ->createKhuyenMai(
-                    $request->validated()
-                );
+            ->createKhuyenMai(
+                $request->validated()
+            );
 
         return response()->json([
             'message' =>
-                'Tạo khuyến mãi thành công',
+            'Tạo khuyến mãi thành công',
 
             'data' => $data
         ], 201);
@@ -67,14 +65,14 @@ class KhuyenMaiController extends Controller
 
         $data =
             $this->khuyenMaiService
-                ->updateKhuyenMai(
-                    $id,
-                    $request->validated()
-                );
+            ->updateKhuyenMai(
+                $id,
+                $request->validated()
+            );
 
         return response()->json([
             'message' =>
-                'Cập nhật khuyến mãi thành công',
+            'Cập nhật khuyến mãi thành công',
 
             'data' => $data
         ]);
@@ -89,7 +87,15 @@ class KhuyenMaiController extends Controller
 
         return response()->json([
             'message' =>
-                'Xóa khuyến mãi thành công'
+            'Xóa khuyến mãi thành công'
         ]);
+    }
+
+    public function public()
+    {
+        return response()->json(
+            $this->khuyenMaiService
+                ->getPublicKhuyenMai()
+        );
     }
 }

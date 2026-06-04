@@ -223,6 +223,11 @@ Route::middleware('auth:sanctum')
 | Khuyen Mai
 |-------------------------------------------------------------------------- 
 */
+Route::get(
+    'khuyen-mai-cong-khai',
+    [KhuyenMaiController::class, 'public']
+);
+
 Route::middleware('auth:sanctum')
     ->group(function () {
 
