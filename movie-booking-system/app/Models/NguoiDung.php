@@ -20,6 +20,9 @@ class NguoiDung extends Authenticatable
         'email',
         'matKhau',
         'vaiTro',
+        'diaChi',
+        'logo',
+        'hinhAnh'
     ];
 
     protected $hidden = [

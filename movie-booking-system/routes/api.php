@@ -14,6 +14,7 @@ use App\Http\Controllers\Api\KhuyenMaiController;
 use App\Http\Controllers\Api\DatVeController;
 use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\BookingManagementController;
+use App\Http\Controllers\Api\TheaterController;
 
 /*
 |--------------------------------------------------------------------------
@@ -301,3 +302,8 @@ Route::middleware('auth:sanctum')
             ]
         );
     });
+
+Route::get(
+    '/theaters',
+    [TheaterController::class, 'index']
+);
