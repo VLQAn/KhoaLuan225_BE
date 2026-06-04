@@ -15,6 +15,7 @@ use App\Http\Controllers\Api\DatVeController;
 use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\BookingManagementController;
 use App\Http\Controllers\Api\TheaterController;
+use App\Http\Controllers\Api\HistoryController;
 
 /*
 |--------------------------------------------------------------------------
@@ -303,7 +304,22 @@ Route::middleware('auth:sanctum')
         );
     });
 
+/*
+|--------------------------------------------------------------------------
+| Danh sách rạp
+|--------------------------------------------------------------------------
+*/
 Route::get(
     '/theaters',
     [TheaterController::class, 'index']
 );
+/*
+|--------------------------------------------------------------------------
+| Lịch sử đặt vé
+|--------------------------------------------------------------------------    
+*/
+Route::middleware('auth:sanctum')
+    ->get(
+        '/booking-history',
+        [HistoryController::class, 'index']
+    );

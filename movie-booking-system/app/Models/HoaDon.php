@@ -46,4 +46,22 @@ class HoaDon extends Model
             'maKhuyenMai'
         );
     }
+
+    public function nguoiDung()
+    {
+        return $this->belongsTo(
+            NguoiDung::class,
+            'maNguoiDung',
+            'maNguoiDung'
+        );
+    }
+
+    public function bapNuocs()
+    {
+        return $this->hasMany(
+            HoaDonBapNuoc::class,
+            'maHoaDon',
+            'maHoaDon'
+        );
+    }
 }

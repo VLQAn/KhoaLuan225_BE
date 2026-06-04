@@ -15,4 +15,13 @@ class HoaDonBapNuoc extends Model
         'donGia',
         'thanhTien'
     ];
+
+    public function mon()
+    {
+        return $this->belongsTo(
+            BapNuoc::class,
+            'maMon',
+            'maMon'
+        );
+    }
 }
