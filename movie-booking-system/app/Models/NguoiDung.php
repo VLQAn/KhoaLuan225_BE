@@ -20,6 +20,8 @@ class NguoiDung extends Authenticatable
         'email',
         'matKhau',
         'vaiTro',
+        'maXacThuc',
+        'thoiGianXacThuc',
         'diaChi',
         'logo',
         'hinhAnh'

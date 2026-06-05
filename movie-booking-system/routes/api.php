@@ -41,6 +41,16 @@ Route::prefix('auth')->group(function () {
         [AuthController::class, 'login']
     );
 
+    Route::post(
+        '/send-otp',
+        [AuthController::class, 'sendOtp']
+    );
+
+    Route::post(
+        '/reset-password',
+        [AuthController::class, 'resetPassword']
+    );
+
     /*
     |--------------------------------------------------------------------------
     | Protected APIs

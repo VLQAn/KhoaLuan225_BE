@@ -11,6 +11,9 @@ use App\Http\Requests\Auth\RegisterRequest;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use App\Http\Requests\Auth\ChangePasswordRequest;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
+use App\Models\NguoiDung;
 
 class AuthController extends Controller
 {
@@ -137,6 +140,134 @@ class AuthController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Đổi mật khẩu thành công'
+        ]);
+    }
+
+    /**
+     * Send OTP for password reset
+     */
+    public function sendOtp(
+        Request $request
+    ) {
+        $request->validate([
+            'email' => 'required|email'
+        ]);
+
+        $user = NguoiDung::where(
+            'email',
+            $request->email
+        )->first();
+
+        if (!$user) {
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Email không tồn tại'
+            ], 404);
+        }
+
+        $otp = rand(
+            100000,
+            999999
+        );
+
+        $user->update([
+            'maXacThuc' => $otp,
+
+            'thoiGianXacThuc' =>
+            now()->addMinutes(5)
+        ]);
+
+        Mail::raw(
+            "Mã OTP khôi phục mật khẩu của bạn là: $otp",
+            function ($message)
+            use ($request) {
+
+                $message
+                    ->to($request->email)
+                    ->subject(
+                        'Khôi phục mật khẩu RACSO Cinema'
+                    );
+            }
+        );
+
+        return response()->json([
+            'success' => true,
+            'message' => 'OTP đã được gửi'
+        ]);
+    }
+
+    /**
+     * Reset password
+     */
+    public function resetPassword(
+        Request $request
+    ) {
+        $request->validate([
+            'email' =>
+            'required|email',
+
+            'otp' =>
+            'required',
+
+            'newPassword' =>
+            'required|min:6'
+        ]);
+
+        $user = NguoiDung::where(
+            'email',
+            $request->email
+        )->first();
+
+        if (!$user) {
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Không tìm thấy tài khoản'
+            ], 404);
+        }
+
+        if (
+            $user->maXacThuc !=
+            $request->otp
+        ) {
+
+            return response()->json([
+                'success' => false,
+                'message' => 'OTP không đúng'
+            ], 400);
+        }
+
+        if (
+            now()->gt(
+                $user->thoiGianXacThuc
+            )
+        ) {
+
+            return response()->json([
+                'success' => false,
+                'message' => 'OTP đã hết hạn'
+            ], 400);
+        }
+
+        $user->update([
+
+            'matKhau' =>
+            Hash::make(
+                $request->newPassword
+            ),
+
+            'maXacThuc' =>
+            null,
+
+            'thoiGianXacThuc' =>
+            null
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' =>
+            'Đổi mật khẩu thành công'
         ]);
     }
 }
