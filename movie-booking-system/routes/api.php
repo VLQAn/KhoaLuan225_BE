@@ -59,6 +59,11 @@ Route::prefix('auth')->group(function () {
                 '/logout',
                 [AuthController::class, 'logout']
             );
+
+            Route::post(
+                '/change-password',
+                [AuthController::class, 'changePassword']
+            );
         });
 });
 

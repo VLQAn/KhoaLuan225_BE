@@ -9,6 +9,8 @@ use App\Http\Resources\NguoiDungResource;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Requests\Auth\RegisterRequest;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use App\Http\Requests\Auth\ChangePasswordRequest;
 
 class AuthController extends Controller
 {
@@ -101,5 +103,40 @@ class AuthController extends Controller
             null,
             'Logout successful'
         );
+    }
+
+    /**
+     * Change password
+     */
+    public function changePassword(
+        ChangePasswordRequest $request
+    ) {
+
+        /** @var \App\Models\NguoiDung|null $user */
+        $user = Auth::user();
+
+        if (
+            !$user || !Hash::check(
+                $request->oldPassword,
+                $user->matKhau
+            )
+        ) {
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Mật khẩu cũ không đúng'
+            ], 400);
+        }
+
+        $user->update([
+            'matKhau' => Hash::make(
+                $request->newPassword
+            )
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Đổi mật khẩu thành công'
+        ]);
     }
 }
