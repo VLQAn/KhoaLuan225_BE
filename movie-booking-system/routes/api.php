@@ -133,7 +133,7 @@ Route::middleware('auth:sanctum')
 */
 Route::middleware('auth:sanctum')
     ->get(
-        '/my-rooms',
+        '/phong-chieu/my-rooms',
         [PhongChieuController::class, 'myRooms']
     );
 
@@ -183,10 +183,10 @@ Route::get(
 
 Route::middleware('auth:sanctum')
     ->get(
-        '/my-showtimes',
+        '/xuat-chieu/my-showtimes',
         [XuatChieuController::class, 'myShowtimes']
     );
-    
+
 Route::middleware('auth:sanctum')
     ->group(function () {
 
