@@ -8,6 +8,8 @@ use App\Services\XuatChieuService;
 use Illuminate\Http\JsonResponse;
 use App\Http\Requests\XuatChieu\StoreXuatChieuRequest;
 use App\Http\Requests\XuatChieu\UpdateXuatChieuRequest;
+use Illuminate\Support\Facades\Auth;
+use App\Models\XuatChieu;
 
 class XuatChieuController extends Controller
 {
@@ -88,6 +90,35 @@ class XuatChieuController extends Controller
         return response()->json(
             $this->xuatChieuService
                 ->getSeatMap($maXuatChieu)
+        );
+    }
+
+    public function myShowtimes()
+    {
+        $user = Auth::user();
+
+        $showtimes = XuatChieu::with([
+            'phim',
+            'phongChieu.rapChieu'
+        ])
+            ->whereHas(
+                'phongChieu.rapChieu',
+                function ($query) use ($user) {
+
+                    $query->where(
+                        'maNguoiDung',
+                        $user->maNguoiDung
+                    );
+                }
+            )
+            ->orderBy(
+                'thoiGianBatDau',
+                'desc'
+            )
+            ->get();
+
+        return response()->json(
+            $showtimes
         );
     }
 }

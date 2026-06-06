@@ -131,6 +131,11 @@ Route::middleware('auth:sanctum')
 | Phong Chieu
 |--------------------------------------------------------------------------
 */
+Route::middleware('auth:sanctum')
+    ->get(
+        '/my-rooms',
+        [PhongChieuController::class, 'myRooms']
+    );
 
 Route::middleware('auth:sanctum')
     ->group(function () {
@@ -176,6 +181,12 @@ Route::get(
     [XuatChieuController::class, 'seatMap']
 );
 
+Route::middleware('auth:sanctum')
+    ->get(
+        '/my-showtimes',
+        [XuatChieuController::class, 'myShowtimes']
+    );
+    
 Route::middleware('auth:sanctum')
     ->group(function () {
 

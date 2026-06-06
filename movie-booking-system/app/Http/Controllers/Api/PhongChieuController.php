@@ -8,6 +8,8 @@ use App\Http\Requests\PhongChieu\StorePhongChieuRequest;
 use App\Services\PhongChieuService;
 use Illuminate\Http\JsonResponse;
 use App\Http\Requests\PhongChieu\UpdatePhongChieuRequest;
+use Illuminate\Support\Facades\Auth;
+use App\Models\PhongChieu;
 
 class PhongChieuController extends Controller
 {
@@ -76,5 +78,27 @@ class PhongChieuController extends Controller
         return response()->json([
             'message' => 'Xóa phòng chiếu thành công'
         ]);
+    }
+
+    public function myRooms()
+    {
+        $user = Auth::user();
+
+        $rooms = PhongChieu::with('rapChieu')
+            ->whereHas(
+                'rapChieu',
+                function ($query) use ($user) {
+
+                    $query->where(
+                        'maNguoiDung',
+                        $user->maNguoiDung
+                    );
+                }
+            )
+            ->get();
+
+        return response()->json(
+            $rooms
+        );
     }
 }
