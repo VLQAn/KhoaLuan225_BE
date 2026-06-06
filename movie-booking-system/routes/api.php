@@ -16,6 +16,7 @@ use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\BookingManagementController;
 use App\Http\Controllers\Api\TheaterController;
 use App\Http\Controllers\Api\HistoryController;
+use App\Http\Controllers\Api\DashboardController;
 
 /*
 |--------------------------------------------------------------------------
@@ -342,4 +343,15 @@ Route::middleware('auth:sanctum')
     ->get(
         '/booking-history',
         [HistoryController::class, 'index']
+    );
+
+/*
+|--------------------------------------------------------------------------
+| Dashboard
+|--------------------------------------------------------------------------
+*/
+Route::middleware('auth:sanctum')
+    ->get(
+        '/admin/dashboard',
+        [DashboardController::class, 'index']
     );
