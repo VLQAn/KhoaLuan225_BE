@@ -78,4 +78,14 @@ class MovieService
 
         return $movie;
     }
+
+    /**
+     * Get movies by year
+     */
+    public function getMoviesByYear(
+        int $year
+    ) {
+        return $this->movieRepository
+            ->findByYear($year);
+    }
 }

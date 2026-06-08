@@ -93,6 +93,11 @@ Route::middleware('auth:sanctum')
         );
     });
 
+Route::get(
+    'movies/year/{year}',
+    [MovieController::class, 'moviesByYear']
+);
+
 Route::apiResource(
     'movies',
     MovieController::class

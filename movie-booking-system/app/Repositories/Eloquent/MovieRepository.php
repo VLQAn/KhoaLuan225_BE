@@ -83,4 +83,18 @@ implements MovieRepositoryInterface
 
         return $movie->delete();
     }
+
+    /**
+     * Find movies by year
+     */
+    public function findByYear(
+        int $year
+    ) {
+        return Phim::with('theLoai')
+            ->whereYear(
+                'ngayCongChieu',
+                $year
+            )
+            ->get();
+    }
 }

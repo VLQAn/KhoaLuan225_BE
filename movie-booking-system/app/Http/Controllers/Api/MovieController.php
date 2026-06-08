@@ -115,4 +115,21 @@ class MovieController extends Controller
             'Movie status updated successfully'
         );
     }
+
+    /**
+     * Movies by year
+     */
+    public function moviesByYear(
+        int $year
+    ) {
+        $movies = $this->movieService
+            ->getMoviesByYear($year);
+
+        return ApiResponse::success(
+            MovieResource::collection(
+                $movies
+            ),
+            'Movies fetched successfully'
+        );
+    }
 }

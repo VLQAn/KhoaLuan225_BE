@@ -16,4 +16,6 @@ interface MovieRepositoryInterface
     );
 
     public function delete(int $id);
+
+    public function findByYear(int $year);
 }
