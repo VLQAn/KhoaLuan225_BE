@@ -117,8 +117,21 @@ class XuatChieuController extends Controller
             )
             ->get();
 
-        return response()->json(
-            $showtimes
-        );
+        $showtimes->transform(function ($showtime) {
+
+            $showtime->thoiGianBatDau =
+                $showtime->thoiGianBatDau
+                ->timezone('Asia/Ho_Chi_Minh')
+                ->format('Y-m-d H:i:s');
+
+            $showtime->thoiGianKetThuc =
+                $showtime->thoiGianKetThuc
+                ->timezone('Asia/Ho_Chi_Minh')
+                ->format('Y-m-d H:i:s');
+
+            return $showtime;
+        });
+
+        return response()->json($showtimes);
     }
 }
