@@ -37,48 +37,6 @@ class ChatbotAIController extends Controller
         $intentName =
             $intent['intent'];
 
-        if ($intentName === 'book_ticket') {
-
-            $movie =
-                $this->bookingService
-                ->findMovie(
-                    $request->message
-                );
-
-            if ($movie) {
-
-                return response()->json([
-
-                    'type' =>
-                    'booking',
-
-                    'action' =>
-                    'select_movie',
-
-                    'movieId' =>
-                    $movie->maPhim,
-
-                    'movieTitle' =>
-                    $movie->tieuDe,
-
-                    'reply' =>
-                    "Tôi đã tìm thấy phim {$movie->tieuDe}. Bạn muốn xem suất chiếu nào?"
-                ]);
-            }
-
-            return response()->json([
-
-                'type' =>
-                'booking',
-
-                'action' =>
-                'ask_movie',
-
-                'reply' =>
-                'Bạn muốn đặt vé phim nào?'
-            ]);
-        }
-
         $context =
             $this->contextService
             ->buildContext();
@@ -138,6 +96,24 @@ KHUYẾN MÃI
 {$promoText}
 
 ";
+
+        if (
+            $intentName === 'book_ticket'
+        ) {
+
+            $bookingData =
+                $this->bookingService
+                ->handle(
+                    $request->message
+                );
+
+            if ($bookingData) {
+
+                return response()->json(
+                    $bookingData
+                );
+            }
+        }
 
         $response = OpenAI::chat()->create([
             'model' => 'gpt-4o-mini',
