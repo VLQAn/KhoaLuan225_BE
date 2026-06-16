@@ -94,4 +94,44 @@ class ChatbotMovieService
             'infoType' => $infoType
         ];
     }
+
+    public function detectComparison(
+        string $message
+    ) {
+        $movies =
+            Phim::all();
+
+        $found = [];
+
+        foreach (
+            $movies as $movie
+        ) {
+
+            if (
+                str_contains(
+                    mb_strtolower($message),
+                    mb_strtolower($movie->tieuDe)
+                )
+            ) {
+
+                $found[] =
+                    $movie;
+            }
+        }
+
+        if (
+            count($found) >= 2
+        ) {
+
+            return [
+                'movie1' =>
+                $found[0],
+
+                'movie2' =>
+                $found[1]
+            ];
+        }
+
+        return null;
+    }
 }
