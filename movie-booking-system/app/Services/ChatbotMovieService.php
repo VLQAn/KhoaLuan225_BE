@@ -1,104 +1,35 @@
-import { normalizeText } from "./chatbotUtils";
-import { findBestMovieMatch } from "./chatbotMovie";
+<?php
 
-export const ChatbotMovieService = {
+namespace App\Services;
 
-    findMovie(
-        query,
-        movies
+use App\Models\Phim;
+
+class ChatbotMovieService
+{
+    public function findMovie(
+        string $message
     ) {
+        $message =
+            mb_strtolower($message);
 
-        let movie =
-            movies.find(m => {
+        $movies =
+            Phim::with('theLoai')
+            ->get();
 
-                const name =
-                    normalizeText(
-                        m.tieuDe
-                    );
+        foreach ($movies as $movie) {
 
-                return (
-                    query.includes(name)
-                    ||
-                    name.includes(query)
-                );
-            });
-
-        if (!movie) {
-
-            movie =
-                findBestMovieMatch(
-                    query,
-                    movies
-                );
+            if (
+                str_contains(
+                    $message,
+                    mb_strtolower(
+                        $movie->tieuDe
+                    )
+                )
+            ) {
+                return $movie;
+            }
         }
 
-        return movie;
-    },
-
-    getTopMovies(
-        movies,
-        limit = 5
-    ) {
-
-        return movies
-            .filter(
-                movie =>
-                    movie.trangThai ===
-                    "dang_chieu"
-            )
-            .sort(
-                (a, b) =>
-                    Number(b.danhGia || 0)
-                    -
-                    Number(a.danhGia || 0)
-            )
-            .slice(0, limit);
-    },
-
-    getMoviesByGenre(
-        movies,
-        genre
-    ) {
-
-        return movies.filter(movie =>
-
-            movie.trangThai ===
-            "dang_chieu"
-
-            &&
-
-            movie.theLoai?.some(
-                type =>
-
-                    normalizeText(
-                        type.tenTheLoai
-                    ) === genre
-            )
-        );
-    },
-
-    getMoviesByRating(
-        movies,
-        rating
-    ) {
-
-        return movies
-            .filter(movie =>
-
-                Number(
-                    movie.danhGia || 0
-                ) >= rating
-
-                &&
-
-                movie.trangThai ===
-                "dang_chieu"
-            )
-            .sort(
-                (a, b) =>
-                    Number(b.danhGia)
-                    -
-                    Number(a.danhGia)
-            );
+        return null;
     }
-};
+}
