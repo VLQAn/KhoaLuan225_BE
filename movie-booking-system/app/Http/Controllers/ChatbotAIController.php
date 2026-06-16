@@ -9,6 +9,7 @@ use App\Services\ChatbotContextService;
 use App\Services\ChatbotIntentService;
 use App\Services\ChatbotBookingService;
 use App\Services\ChatbotSessionService;
+use App\Services\ChatbotMovieService;
 
 class ChatbotAIController extends Controller
 {
@@ -16,17 +17,20 @@ class ChatbotAIController extends Controller
     protected $intentService;
     protected $bookingService;
     protected $sessionService;
+    protected $movieService;
 
     public function __construct(
         ChatbotContextService $contextService,
         ChatbotIntentService $intentService,
         ChatbotBookingService $bookingService,
-        ChatbotSessionService $sessionService
+        ChatbotSessionService $sessionService,
+        ChatbotMovieService $movieService
     ) {
         $this->contextService = $contextService;
         $this->intentService = $intentService;
         $this->bookingService = $bookingService;
         $this->sessionService = $sessionService;
+        $this->movieService = $movieService;
     }
 
     public function ask(Request $request)
@@ -145,6 +149,46 @@ KHUYẾN MÃI
                     $bookingData
                 );
             }
+        }
+
+        $comparison =
+            $this->movieService
+            ->detectComparison(
+                $request->message
+            );
+
+        if ($comparison) {
+
+            return response()->json([
+                'type' =>
+                'comparison',
+
+                'movie1' =>
+                $comparison['movie1'],
+
+                'movie2' =>
+                $comparison['movie2']
+            ]);
+        }
+
+        $rating =
+            $this->movieService
+            ->detectRating(
+                $request->message
+            );
+
+        if ($rating) {
+
+            return response()->json([
+                'type' =>
+                'rating_filter',
+
+                'movies' =>
+                $this->movieService
+                    ->getMoviesByRating(
+                        $rating
+                    )
+            ]);
         }
 
         $response = OpenAI::chat()->create([
