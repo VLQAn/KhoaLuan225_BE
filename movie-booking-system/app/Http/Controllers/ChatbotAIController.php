@@ -5,16 +5,23 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use OpenAI\Laravel\Facades\OpenAI;
 use App\Services\ChatbotContextService;
+use App\Services\ChatbotIntentService;
+use App\Services\ChatbotBookingService;
 
 class ChatbotAIController extends Controller
 {
     protected $contextService;
+    protected $intentService;
+    protected $bookingService;
 
     public function __construct(
-        ChatbotContextService $contextService
+        ChatbotContextService $contextService,
+        ChatbotIntentService $intentService,
+        ChatbotBookingService $bookingService
     ) {
-        $this->contextService =
-            $contextService;
+        $this->contextService = $contextService;
+        $this->intentService = $intentService;
+        $this->bookingService = $bookingService;
     }
 
     public function ask(Request $request)
@@ -22,6 +29,55 @@ class ChatbotAIController extends Controller
         $request->validate([
             'message' => 'required|string|max:500'
         ]);
+
+        $intent =
+            $this->intentService
+            ->detect($request->message);
+
+        $intentName =
+            $intent['intent'];
+
+        if ($intentName === 'book_ticket') {
+
+            $movie =
+                $this->bookingService
+                ->findMovie(
+                    $request->message
+                );
+
+            if ($movie) {
+
+                return response()->json([
+
+                    'type' =>
+                    'booking',
+
+                    'action' =>
+                    'select_movie',
+
+                    'movieId' =>
+                    $movie->maPhim,
+
+                    'movieTitle' =>
+                    $movie->tieuDe,
+
+                    'reply' =>
+                    "Tôi đã tìm thấy phim {$movie->tieuDe}. Bạn muốn xem suất chiếu nào?"
+                ]);
+            }
+
+            return response()->json([
+
+                'type' =>
+                'booking',
+
+                'action' =>
+                'ask_movie',
+
+                'reply' =>
+                'Bạn muốn đặt vé phim nào?'
+            ]);
+        }
 
         $context =
             $this->contextService
@@ -98,6 +154,7 @@ KHUYẾN MÃI
         ]);
 
         return response()->json([
+            'type' => $intentName,
             'reply' => $response->choices[0]->message->content
         ]);
     }
