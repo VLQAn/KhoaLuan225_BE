@@ -19,8 +19,9 @@ class ChatbotContextService
             )->get(),
 
             'promotions' => KhuyenMai::where(
-                'trangThai',
-                'Hoat_Dong'
+                'thoiHan',
+                '>=',
+                now()
             )->get(),
 
             'showtimes' => XuatChieu::with(

@@ -151,6 +151,44 @@ KHUYẾN MÃI
             }
         }
 
+        $movieInfo =
+            $this->movieService
+            ->getMovieInfo(
+                $request->message
+            );
+
+
+        if ($movieInfo) {
+
+            $movie = $movieInfo['movie'];
+
+            return response()->json([
+
+                'type' => 'movie_info',
+
+                'infoType' => $movieInfo['infoType'],
+
+                'movie' => [
+
+                    'id' => $movie->maPhim,
+
+                    'title' => $movie->tieuDe,
+
+                    'description' => $movie->moTa,
+
+                    'director' => $movie->daoDien,
+
+                    'actors' => $movie->dienVien,
+
+                    'rating' => $movie->danhGia,
+
+                    'duration' => $movie->thoiLuong,
+
+                    'status' => $movie->trangThai
+                ]
+            ]);
+        }
+
         $comparison =
             $this->movieService
             ->detectComparison(

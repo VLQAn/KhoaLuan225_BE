@@ -3,41 +3,62 @@
 namespace App\Services;
 
 use App\Models\Phim;
+use App\Helpers\TextHelper;
 
 class ChatbotMovieService
 {
-    public function findMovie(
-        string $message
-    ) {
+    public function findMovie(string $message)
+    {
         $message =
-            mb_strtolower($message);
+            TextHelper::normalize(
+                $message
+            );
 
-        $movies =
-            Phim::with('theLoai')
-            ->get();
+        $message = preg_replace(
+            '/(nội dung|tóm tắt|đạo diễn|diễn viên|phim|cho xem)/u',
+            '',
+            $message
+        );
+
+        $message = trim($message);
+
+        $movies = Phim::all();
+
+        $bestMovie = null;
+        $bestScore = 0;
 
         foreach ($movies as $movie) {
 
-            if (
-                str_contains(
-                    $message,
-                    mb_strtolower(
-                        $movie->tieuDe
-                    )
-                )
-            ) {
-                return $movie;
+            $title =
+                TextHelper::normalize(
+                    $movie->tieuDe
+                );
+
+            similar_text(
+                $message,
+                $title,
+                $percent
+            );
+
+            if ($percent > $bestScore) {
+
+                $bestScore = $percent;
+                $bestMovie = $movie;
             }
         }
 
-        return null;
+        return $bestScore >= 20
+            ? $bestMovie
+            : null;
     }
 
     public function detectMovieInfoIntent(
         string $message
     ) {
         $message =
-            mb_strtolower($message);
+            TextHelper::normalize(
+                $message
+            );
 
         if (
             str_contains(
@@ -45,7 +66,6 @@ class ChatbotMovieService
                 'noi dung'
             )
         ) {
-
             return 'summary';
         }
 
@@ -55,7 +75,6 @@ class ChatbotMovieService
                 'dao dien'
             )
         ) {
-
             return 'director';
         }
 
@@ -65,7 +84,6 @@ class ChatbotMovieService
                 'dien vien'
             )
         ) {
-
             return 'actor';
         }
 
@@ -106,11 +124,20 @@ class ChatbotMovieService
         foreach (
             $movies as $movie
         ) {
+            $message =
+                TextHelper::normalize(
+                    $message
+                );
+
+            $title =
+                TextHelper::normalize(
+                    $movie->tieuDe
+                );
 
             if (
                 str_contains(
-                    mb_strtolower($message),
-                    mb_strtolower($movie->tieuDe)
+                    $message,
+                    $title
                 )
             ) {
 
