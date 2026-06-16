@@ -80,10 +80,14 @@ class DatVeService
 
                 $ghe = Ghe::find($maGhe);
 
-                if (!$ghe) {
+                if (
+                    $ghe->maPhongChieu
+                    !=
+                    $xuatChieu->maPhongChieu
+                ) {
 
                     throw new Exception(
-                        "Ghế {$maGhe} không tồn tại"
+                        "Ghế {$ghe->tenGhe} không thuộc phòng chiếu của xuất chiếu này"
                     );
                 }
 
@@ -93,8 +97,13 @@ class DatVeService
                     $gioChieu
                 )
                     ->where(
+                        'gioBatDau',
+                        '<=',
+                        $gioChieu
+                    )
+                    ->where(
                         'gioKetThuc',
-                        '>=',
+                        '>',
                         $gioChieu
                     )
                     ->first();

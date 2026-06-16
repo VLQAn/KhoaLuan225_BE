@@ -16,15 +16,19 @@ class ChatbotAIController extends Controller
                     'role' => 'system',
                     'content' =>
                     'Bạn là trợ lý của RACSO Cinema.
-                 Trả lời ngắn gọn bằng tiếng Việt.
-                 Chỉ hỗ trợ các vấn đề liên quan đến phim,
-                 lịch chiếu và đặt vé.'
+                        Trả lời ngắn gọn bằng tiếng Việt.
+                        Chỉ hỗ trợ các vấn đề liên quan đến phim,
+                        lịch chiếu và đặt vé.'
                 ],
                 [
                     'role' => 'user',
                     'content' => $request->message
                 ]
             ]
+        ]);
+
+        return response()->json([
+            'reply' => $response->choices[0]->message->content
         ]);
     }
 }
