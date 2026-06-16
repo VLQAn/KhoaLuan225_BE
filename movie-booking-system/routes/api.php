@@ -17,6 +17,7 @@ use App\Http\Controllers\Api\BookingManagementController;
 use App\Http\Controllers\Api\TheaterController;
 use App\Http\Controllers\Api\HistoryController;
 use App\Http\Controllers\Api\DashboardController;
+use App\Http\Controllers\ChatbotAIController;
 
 /*
 |--------------------------------------------------------------------------
@@ -371,3 +372,13 @@ Route::middleware('auth:sanctum')
         '/admin/dashboard',
         [DashboardController::class, 'index']
     );
+
+/*
+|--------------------------------------------------------------------------
+| CHAT BOT
+|--------------------------------------------------------------------------
+*/
+Route::post(
+    '/chatbot/ask',
+    [ChatbotAIController::class, 'ask']
+);
