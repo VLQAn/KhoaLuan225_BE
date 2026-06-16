@@ -151,6 +151,111 @@ KHUYẾN MÃI
             }
         }
 
+        // comparison
+        $comparison =
+            $this->movieService
+            ->detectComparison(
+                $request->message
+            );
+
+        if ($comparison) {
+
+            return response()->json([
+                'type' =>
+                'comparison',
+
+                'movie1' =>
+                $comparison['movie1'],
+
+                'movie2' =>
+                $comparison['movie2']
+            ]);
+        }
+
+        // rating
+        $rating =
+            $this->movieService
+            ->detectRating(
+                $request->message
+            );
+
+        if ($rating) {
+
+            return response()->json([
+                'type' =>
+                'rating_filter',
+
+                'movies' =>
+                $this->movieService
+                    ->getMoviesByRating(
+                        $rating
+                    )
+            ]);
+        }
+
+        // genre
+        $genre =
+            $this->movieService
+            ->detectGenre(
+                $request->message
+            );
+
+        if ($genre) {
+
+            return response()->json([
+
+                'type' =>
+                'genre_filter',
+
+                'genre' =>
+                $genre,
+
+                'movies' =>
+                $this->movieService
+                    ->getMoviesByGenre(
+                        $genre
+                    )
+            ]);
+        }
+
+        // topMovies
+        if (
+            $this->movieService
+            ->detectTopMovies(
+                $request->message
+            )
+        ) {
+
+            return response()->json([
+                'type' => 'top_movies',
+                'movies' =>
+                $this->movieService
+                    ->getTopMovies(5)
+            ]);
+        }
+
+        // recommendMovies
+        if (
+            $this->movieService
+            ->detectRecommendation(
+                $request->message
+            )
+        ) {
+
+            return response()->json([
+
+                'type' =>
+                'recommendation',
+
+                'movies' =>
+                $this->movieService
+                    ->getRecommendedMovies(
+                        $request->message
+                    )
+            ]);
+        }
+
+        // movieInfo
         $movieInfo =
             $this->movieService
             ->getMovieInfo(
@@ -189,46 +294,7 @@ KHUYẾN MÃI
             ]);
         }
 
-        $comparison =
-            $this->movieService
-            ->detectComparison(
-                $request->message
-            );
-
-        if ($comparison) {
-
-            return response()->json([
-                'type' =>
-                'comparison',
-
-                'movie1' =>
-                $comparison['movie1'],
-
-                'movie2' =>
-                $comparison['movie2']
-            ]);
-        }
-
-        $rating =
-            $this->movieService
-            ->detectRating(
-                $request->message
-            );
-
-        if ($rating) {
-
-            return response()->json([
-                'type' =>
-                'rating_filter',
-
-                'movies' =>
-                $this->movieService
-                    ->getMoviesByRating(
-                        $rating
-                    )
-            ]);
-        }
-
+        // OpenAI
         $response = OpenAI::chat()->create([
             'model' => 'gpt-4o-mini',
             'messages' => [
