@@ -10,19 +10,41 @@ class ChatbotMovieService
     public function findMovie(string $message)
     {
         $message =
-            TextHelper::normalize(
+            TextHelper::cleanMovieQuery(
                 $message
             );
 
-        $message = preg_replace(
-            '/(nội dung|tóm tắt|đạo diễn|diễn viên|phim|cho xem)/u',
-            '',
-            $message
-        );
-
-        $message = trim($message);
-
         $movies = Phim::all();
+
+        /*
+    =========================
+    ƯU TIÊN MATCH TRỰC TIẾP
+    =========================
+    */
+
+        foreach ($movies as $movie) {
+
+            $title =
+                TextHelper::normalize(
+                    $movie->tieuDe
+                );
+
+            if (
+                str_contains(
+                    $title,
+                    $message
+                )
+            ) {
+
+                return $movie;
+            }
+        }
+
+        /*
+    =========================
+    FALLBACK FUZZY MATCH
+    =========================
+    */
 
         $bestMovie = null;
         $bestScore = 0;
@@ -47,7 +69,7 @@ class ChatbotMovieService
             }
         }
 
-        return $bestScore >= 20
+        return $bestScore >= 40
             ? $bestMovie
             : null;
     }
