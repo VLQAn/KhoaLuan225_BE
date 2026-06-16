@@ -3,25 +3,30 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use OpenAI\Laravel\Facades\OpenAI;
 use App\Services\ChatbotContextService;
 use App\Services\ChatbotIntentService;
 use App\Services\ChatbotBookingService;
+use App\Services\ChatbotSessionService;
 
 class ChatbotAIController extends Controller
 {
     protected $contextService;
     protected $intentService;
     protected $bookingService;
+    protected $sessionService;
 
     public function __construct(
         ChatbotContextService $contextService,
         ChatbotIntentService $intentService,
-        ChatbotBookingService $bookingService
+        ChatbotBookingService $bookingService,
+        ChatbotSessionService $sessionService
     ) {
         $this->contextService = $contextService;
         $this->intentService = $intentService;
         $this->bookingService = $bookingService;
+        $this->sessionService = $sessionService;
     }
 
     public function ask(Request $request)
@@ -29,6 +34,22 @@ class ChatbotAIController extends Controller
         $request->validate([
             'message' => 'required|string|max:500'
         ]);
+
+        $session =
+            $this->sessionService
+            ->getOrCreate(
+                Auth::id()
+            );
+
+        $this->sessionService
+            ->saveMessage(
+
+                $session->maPhien,
+
+                'user',
+
+                $request->message
+            );
 
         $intent =
             $this->intentService
@@ -104,10 +125,21 @@ KHUYẾN MÃI
             $bookingData =
                 $this->bookingService
                 ->handle(
-                    $request->message
+                    $request->message,
+                    Auth::id()
                 );
 
             if ($bookingData) {
+
+                $this->sessionService
+                    ->saveMessage(
+
+                        $session->maPhien,
+
+                        'bot',
+
+                        $bookingData['reply']
+                    );
 
                 return response()->json(
                     $bookingData
