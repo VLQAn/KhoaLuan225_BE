@@ -134,4 +134,32 @@ class ChatbotMovieService
 
         return null;
     }
+
+    public function detectRating(
+        string $message
+    ) {
+        preg_match(
+            '/(\d+(\.\d+)?)/',
+            $message,
+            $matches
+        );
+
+        return
+            $matches[1]
+            ?? null;
+    }
+
+    public function getMoviesByRating(
+        float $rating
+    ) {
+        return Phim::where(
+            'danhGia',
+            '>=',
+            $rating
+        )
+            ->orderByDesc(
+                'danhGia'
+            )
+            ->get();
+    }
 }
