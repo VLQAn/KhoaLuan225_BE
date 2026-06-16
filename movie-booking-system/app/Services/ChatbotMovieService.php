@@ -32,4 +32,66 @@ class ChatbotMovieService
 
         return null;
     }
+
+    public function detectMovieInfoIntent(
+        string $message
+    ) {
+        $message =
+            mb_strtolower($message);
+
+        if (
+            str_contains(
+                $message,
+                'noi dung'
+            )
+        ) {
+
+            return 'summary';
+        }
+
+        if (
+            str_contains(
+                $message,
+                'dao dien'
+            )
+        ) {
+
+            return 'director';
+        }
+
+        if (
+            str_contains(
+                $message,
+                'dien vien'
+            )
+        ) {
+
+            return 'actor';
+        }
+
+        return null;
+    }
+
+    public function getMovieInfo(
+        string $message
+    ) {
+        $movie =
+            $this->findMovie(
+                $message
+            );
+
+        if (!$movie) {
+            return null;
+        }
+
+        $infoType =
+            $this->detectMovieInfoIntent(
+                $message
+            );
+
+        return [
+            'movie' => $movie,
+            'infoType' => $infoType
+        ];
+    }
 }
