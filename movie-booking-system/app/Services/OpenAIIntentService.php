@@ -273,6 +273,46 @@ User: top 5 phim
   "intent":"top_movies"
 }
 
+User: so sánh Star Wars và Avengers
+
+{
+  "intent":"comparison",
+  "movie1":"Star Wars",
+  "movie2":"Avengers"
+}
+
+User: so sánh Star Wars với Avengers
+
+{
+  "intent":"comparison",
+  "movie1":"Star Wars",
+  "movie2":"Avengers"
+}
+
+User: Star Wars hay Avengers hay hơn
+
+{
+  "intent":"comparison",
+  "movie1":"Star Wars",
+  "movie2":"Avengers"
+}
+
+User: nên xem Star Wars hay Avengers
+
+{
+  "intent":"comparison",
+  "movie1":"Star Wars",
+  "movie2":"Avengers"
+}
+
+User: Avengers và Star Wars khác gì nhau
+
+{
+  "intent":"comparison",
+  "movie1":"Avengers",
+  "movie2":"Star Wars"
+}
+
 '
                 ],
 

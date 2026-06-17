@@ -205,23 +205,64 @@ KHUYẾN MÃI
         }
 
         // comparison
-        $comparison =
-            $this->movieService
-            ->detectComparison(
-                $request->message
-            );
+        // $comparison =
+        //     $this->movieService
+        //     ->detectComparison(
+        //         $request->message
+        //     );
 
-        if ($comparison) {
+        // if ($comparison) {
+
+        //     return response()->json([
+        //         'type' =>
+        //         'comparison',
+
+        //         'movie1' =>
+        //         $comparison['movie1'],
+
+        //         'movie2' =>
+        //         $comparison['movie2']
+        //     ]);
+        // }
+
+        if (
+            $aiIntentName ===
+            'comparison'
+        ) {
+
+            $movie1 =
+                $this->movieService
+                ->getMovieByName(
+                    $aiIntent['movie1']
+                );
+
+            $movie2 =
+                $this->movieService
+                ->getMovieByName(
+                    $aiIntent['movie2']
+                );
+
+            if (
+                !$movie1 ||
+                !$movie2
+            ) {
+
+                return response()->json([
+                    'type' =>
+                    'movie_not_found'
+                ]);
+            }
 
             return response()->json([
+
                 'type' =>
                 'comparison',
 
                 'movie1' =>
-                $comparison['movie1'],
+                $movie1,
 
                 'movie2' =>
-                $comparison['movie2']
+                $movie2
             ]);
         }
 
