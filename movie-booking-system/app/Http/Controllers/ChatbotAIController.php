@@ -184,8 +184,7 @@ KHUYẾN MÃI
                 ->handle(
                     $request->message,
                     Auth::id(),
-                    $aiIntent['movie']
-                        ?? null
+                    $aiIntent
                 );
 
             if ($bookingData) {

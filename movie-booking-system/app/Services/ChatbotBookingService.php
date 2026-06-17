@@ -42,11 +42,15 @@ class ChatbotBookingService
     public function handle(
         string $message,
         ?int $userId = null,
-        ?string $movieName = null
+        array $aiIntent = []
     ) {
         $session =
             $this->sessionService
             ->getOrCreate($userId);
+
+        $movieName =
+            $aiIntent['movie']
+            ?? null;
 
         $movie = null;
 
@@ -64,10 +68,18 @@ class ChatbotBookingService
                 $this->findMovie(
                     $message
                 );
+        }
+
+        if (!$movie) {
 
             return [
-                'type' => 'booking',
-                'action' => 'ask_movie',
+
+                'type' =>
+                'booking',
+
+                'action' =>
+                'ask_movie',
+
                 'reply' =>
                 'Bạn muốn đặt vé phim nào?'
             ];
@@ -79,6 +91,18 @@ class ChatbotBookingService
                 $session->maPhien,
                 $movie->maPhim
             );
+
+        if (
+            !empty($aiIntent['quantity'])
+        ) {
+
+            $this->sessionService
+                ->setData(
+                    $session->maPhien,
+                    'quantity',
+                    $aiIntent['quantity']
+                );
+        }
 
         $showtimes =
             XuatChieu::with([
@@ -97,6 +121,13 @@ class ChatbotBookingService
                 'thoiGianBatDau'
             )
             ->get();
+
+        $this->sessionService
+            ->setData(
+                $session->maPhien,
+                'booking_step',
+                'select_showtime'
+            );
 
         return [
 

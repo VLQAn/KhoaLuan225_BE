@@ -9,8 +9,7 @@ class ChatbotSessionService
 {
     public function getOrCreate(
         ?int $userId = null
-    )
-    {
+    ) {
         $session =
             PhienTroChuyen::where(
                 'maNguoiDung',
@@ -31,10 +30,10 @@ class ChatbotSessionService
         return PhienTroChuyen::create([
 
             'maNguoiDung' =>
-                $userId,
+            $userId,
 
             'trangThai' =>
-                'active'
+            'active'
         ]);
     }
 
@@ -42,65 +41,100 @@ class ChatbotSessionService
         int $sessionId,
         string $sender,
         string $content
-    )
-    {
+    ) {
         return LichSuTroChuyen::create([
 
             'maPhien' =>
-                $sessionId,
+            $sessionId,
 
             'nguoiGui' =>
-                $sender,
+            $sender,
 
             'noiDung' =>
-                $content
+            $content
         ]);
     }
 
     public function setMovie(
         int $sessionId,
         int $movieId
-    )
-    {
+    ) {
         return PhienTroChuyen::where(
             'maPhien',
             $sessionId
         )->update([
 
             'phimDangChon' =>
-                $movieId
+            $movieId
         ]);
     }
 
     public function setShowtime(
         int $sessionId,
         int $showtimeId
-    )
-    {
+    ) {
         return PhienTroChuyen::where(
             'maPhien',
             $sessionId
         )->update([
 
             'xuatChieuDangChon' =>
-                $showtimeId
+            $showtimeId
         ]);
+    }
+
+    public function setData(
+        int $sessionId,
+        string $key,
+        $value
+    ) {
+        $session =
+            PhienTroChuyen::find(
+                $sessionId
+            );
+
+        $data =
+            $session->duLieu ?? [];
+
+        $data[$key] =
+            $value;
+
+        $session->duLieu =
+            $data;
+
+        $session->save();
+    }
+
+    public function getData(
+        int $sessionId,
+        string $key
+    ) {
+        $session =
+            PhienTroChuyen::find(
+                $sessionId
+            );
+
+        $data =
+            $session->duLieu ?? [];
+
+        return
+            $data[$key]
+            ?? null;
     }
 
     public function clearSession(
         int $sessionId
-    )
-    {
+    ) {
         return PhienTroChuyen::where(
             'maPhien',
             $sessionId
         )->update([
 
             'phimDangChon' =>
-                null,
+            null,
 
             'xuatChieuDangChon' =>
-                null
+            null
         ]);
     }
 }

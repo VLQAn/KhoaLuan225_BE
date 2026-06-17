@@ -20,4 +20,9 @@ class PhienTroChuyen extends Model
 
         'trangThai'
     ];
+
+    protected $casts = [
+
+        'duLieu' => 'array'
+    ];
 }
