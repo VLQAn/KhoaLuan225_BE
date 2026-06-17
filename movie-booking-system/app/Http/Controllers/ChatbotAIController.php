@@ -38,6 +38,32 @@ class ChatbotAIController extends Controller
         $this->openAIIntentService = $openAIIntentService;
     }
 
+    private function normalizeGenre(
+        string $genre
+    ) {
+        $map = [
+
+            'Viễn tưởng' =>
+            'Khoa học viễn tưởng',
+
+            'Sci-fi' =>
+            'Khoa học viễn tưởng',
+
+            'Khoa học viễn tưởng' =>
+            'Khoa học viễn tưởng',
+
+            'Trẻ em' =>
+            'Hoạt hình',
+
+            'Thiếu nhi' =>
+            'Hoạt hình'
+        ];
+
+        return
+            $map[$genre]
+            ?? $genre;
+    }
+
     public function ask(Request $request)
     {
         $request->validate([
@@ -141,10 +167,13 @@ KHUYẾN MÃI
             'intent' => $intentName
         ]);
 
-        Log::info('AI INTENT', [
-            'intent' => $aiIntentName,
-            'data' => $aiIntent
-        ]);
+        Log::info(
+            'AI INTENT',
+            [
+                'intent' => $aiIntentName,
+                'data' => $aiIntent
+            ]
+        );
 
         if (
             $intentName === 'book_ticket'
@@ -218,13 +247,39 @@ KHUYẾN MÃI
         }
 
         // genre
-        $genre =
-            $this->movieService
-            ->detectGenre(
-                $request->message
-            );
+        // $genre =
+        //     $this->normalizeGenre(
+        //         $genre
+        //     );
 
-        if ($genre) {
+        // if ($genre) {
+
+        //     return response()->json([
+
+        //         'type' =>
+        //         'genre_filter',
+
+        //         'genre' =>
+        //         $genre,
+
+        //         'movies' =>
+        //         $this->movieService
+        //             ->getMoviesByGenre(
+        //                 $genre
+        //             )
+        //     ]);
+        // }
+
+        // genre AI
+        if (
+            $aiIntentName ===
+            'genre_filter'
+        ) {
+
+            $genre =
+                $this->normalizeGenre(
+                    $aiIntent['genre']
+                );
 
             return response()->json([
 

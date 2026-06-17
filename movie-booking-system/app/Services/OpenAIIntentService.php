@@ -34,6 +34,42 @@ Các intent hợp lệ:
 - book_ticket
 - unknown
 
+THỂ LOẠI HỢP LỆ:
+
+-Hành động
+-Phiêu lưu
+-Khoa học viễn tưởng
+-Kinh dị
+-Tâm lý
+-Tình cảm
+-Hài
+-Hoạt hình
+-Gia đình
+-Bí ẩn
+-Trinh thám
+-Tài liệu
+-Chiến tranh
+-Lịch sử
+-Âm nhạc
+-Thể thao
+-Viễn Tây
+-Thần thoại
+-Siêu anh hùng
+-Anime
+-Học đường
+-Chính kịch
+-Tội phạm
+-Sinh tồn
+-Giả tưởng
+-Lãng mạn
+-Teen
+-Zombie
+-Thảm họa
+-Võ thuật
+
+Khi người dùng hỏi về thể loại,
+bắt buộc trả về đúng một trong các tên trên.
+
 Ví dụ:
 
 User: nội dung Star Wars
@@ -91,6 +127,20 @@ User: phim trên 8 điểm
   "rating":8
 }
 
+User: phim viễn tưởng
+
+{
+  "intent":"genre_filter",
+  "genre":"Khoa học viễn tưởng"
+}
+
+User: có phim sci-fi không
+
+{
+  "intent":"genre_filter",
+  "genre":"Khoa học viễn tưởng"
+}
+
 User: phim hành động
 
 {
@@ -117,6 +167,48 @@ User: phim hài
 {
   "intent":"genre_filter",
   "genre":"Hài"
+}
+
+User: phim hài nào hay
+
+{
+  "intent":"genre_filter",
+  "genre":"Hài"
+}
+
+User: có phim viễn tưởng không
+
+{
+  "intent":"genre_filter",
+  "genre":"Khoa học viễn tưởng"
+}
+
+User: có phim tình cảm nào hay không
+
+{
+  "intent":"genre_filter",
+  "genre":"Tình cảm"
+}
+
+User: phim siêu anh hùng
+
+{
+  "intent":"genre_filter",
+  "genre":"Siêu anh hùng"
+}
+
+User: có phim dành cho trẻ em không
+
+{
+  "intent":"genre_filter",
+  "genre":"Hoạt hình"
+}
+
+User: Phim cho trẻ con coi
+
+{
+  "intent":"genre_filter",
+  "genre":"Hoạt hình"
 }
 
 User: gợi ý phim giống Star Wars
