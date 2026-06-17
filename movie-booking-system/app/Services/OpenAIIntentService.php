@@ -273,6 +273,38 @@ User: top 5 phim
   "intent":"top_movies"
 }
 
+User: top phim hay nhất
+
+{
+  "intent":"top_movies"
+}
+
+User: phim được đánh giá cao nhất
+
+{
+  "intent":"top_movies"
+}
+
+User: top 10 phim
+
+{
+  "intent":"top_movies",
+  "limit":10
+}
+
+User: cho tôi 5 phim hay nhất
+
+{
+  "intent":"top_movies",
+  "limit":5
+}
+
+User: những phim nổi bật nhất
+
+{
+  "intent":"top_movies"
+}
+
 User: so sánh Star Wars và Avengers
 
 {

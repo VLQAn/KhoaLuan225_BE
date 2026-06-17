@@ -362,18 +362,43 @@ KHUYẾN MÃI
         }
 
         // topMovies
+        // if (
+        //     $this->movieService
+        //     ->detectTopMovies(
+        //         $request->message
+        //     )
+        // ) {
+
+        //     return response()->json([
+        //         'type' => 'top_movies',
+        //         'movies' =>
+        //         $this->movieService
+        //             ->getTopMovies(5)
+        //     ]);
+        // }
+
         if (
-            $this->movieService
-            ->detectTopMovies(
-                $request->message
-            )
+            $aiIntentName ===
+            'top_movies'
         ) {
 
+            $limit =
+                $aiIntent['limit']
+                ?? 5;
+
             return response()->json([
-                'type' => 'top_movies',
+
+                'type' =>
+                'top_movies',
+
+                'limit' =>
+                $limit,
+
                 'movies' =>
                 $this->movieService
-                    ->getTopMovies(5)
+                    ->getTopMovies(
+                        (int)$limit
+                    )
             ]);
         }
 
