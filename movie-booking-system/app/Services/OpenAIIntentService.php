@@ -345,6 +345,45 @@ User: Avengers và Star Wars khác gì nhau
   "movie2":"Star Wars"
 }
 
+User: đặt vé Star Wars
+
+{
+  "intent":"book_ticket",
+  "movie":"Star Wars"
+}
+
+User: đặt 2 vé Star Wars
+
+{
+  "intent":"book_ticket",
+  "movie":"Star Wars",
+  "quantity":2
+}
+
+User: mua 3 vé Avengers
+
+{
+  "intent":"book_ticket",
+  "movie":"Avengers",
+  "quantity":3
+}
+
+User: tôi muốn đặt vé phim Star Wars
+
+{
+  "intent":"book_ticket",
+  "movie":"Star Wars"
+}
+
+User: đặt 4 vé Star Wars lúc 18 giờ
+
+{
+  "intent":"book_ticket",
+  "movie":"Star Wars",
+  "quantity":4,
+  "time":"18:00"
+}
+
 '
                 ],
 

@@ -176,14 +176,16 @@ KHUYẾN MÃI
         );
 
         if (
-            $intentName === 'book_ticket'
+            $aiIntentName  === 'book_ticket'
         ) {
 
             $bookingData =
                 $this->bookingService
                 ->handle(
                     $request->message,
-                    Auth::id()
+                    Auth::id(),
+                    $aiIntent['movie']
+                        ?? null
                 );
 
             if ($bookingData) {

@@ -27,8 +27,8 @@ class ChatbotBookingService
 
             if (
                 str_contains(
-                    mb_strtolower($message),
-                    mb_strtolower($movie->tieuDe)
+                    mb_strtolower($movie->tieuDe),
+                    mb_strtolower($message)
                 )
             ) {
 
@@ -41,16 +41,29 @@ class ChatbotBookingService
 
     public function handle(
         string $message,
-        ?int $userId = null
+        ?int $userId = null,
+        ?string $movieName = null
     ) {
         $session =
             $this->sessionService
             ->getOrCreate($userId);
 
-        $movie =
-            $this->findMovie($message);
+        $movie = null;
+
+        if ($movieName) {
+
+            $movie =
+                $this->findMovie(
+                    $movieName
+                );
+        }
 
         if (!$movie) {
+
+            $movie =
+                $this->findMovie(
+                    $message
+                );
 
             return [
                 'type' => 'booking',
