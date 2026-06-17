@@ -226,22 +226,45 @@ KHUYẾN MÃI
         }
 
         // rating
-        $rating =
-            $this->movieService
-            ->detectRating(
-                $request->message
-            );
+        // $rating =
+        //     $this->movieService
+        //     ->detectRating(
+        //         $request->message
+        //     );
 
-        if ($rating) {
+        // if ($rating) {
+
+        //     return response()->json([
+        //         'type' =>
+        //         'rating_filter',
+
+        //         'movies' =>
+        //         $this->movieService
+        //             ->getMoviesByRating(
+        //                 $rating
+        //             )
+        //     ]);
+        // }
+
+        // rating
+        if (
+            $aiIntentName ===
+            'rating_filter'
+        ) {
 
             return response()->json([
+
                 'type' =>
                 'rating_filter',
+
+                'rating' =>
+                $aiIntent['rating'],
 
                 'movies' =>
                 $this->movieService
                     ->getMoviesByRating(
-                        $rating
+                        (float)
+                        $aiIntent['rating']
                     )
             ]);
         }

@@ -127,6 +127,55 @@ User: phim trên 8 điểm
   "rating":8
 }
 
+User: phim từ 8 điểm trở lên
+
+{
+  "intent":"rating_filter",
+  "rating":8
+}
+
+User: phim trên 9 điểm
+
+{
+  "intent":"rating_filter",
+  "rating":9
+}
+
+User: phim đánh giá cao
+
+{
+  "intent":"rating_filter",
+  "rating":8.5
+}
+
+User: phim hay trên 8 điểm
+
+{
+  "intent":"rating_filter",
+  "rating":8
+}
+
+User: phim được chấm điểm cao
+
+{
+  "intent":"rating_filter",
+  "rating":8.5
+}
+
+User: phim có rating cao
+
+{
+  "intent":"rating_filter",
+  "rating":8.5
+}
+
+User: phim rating cao
+
+{
+  "intent":"rating_filter",
+  "rating":8.5
+}
+
 User: phim viễn tưởng
 
 {

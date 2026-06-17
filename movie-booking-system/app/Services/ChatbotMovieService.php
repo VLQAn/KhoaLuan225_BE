@@ -83,28 +83,28 @@ class ChatbotMovieService
     RATING
     =========================
     */
-    public function detectRating(
-        string $message
-    ) {
-        $message =
-            TextHelper::normalize(
-                $message
-            );
+    // public function detectRating(
+    //     string $message
+    // ) {
+    //     $message =
+    //         TextHelper::normalize(
+    //             $message
+    //         );
 
-        if (
-            !preg_match(
-                '/(tren|tu)\s*(\d+(\.\d+)?)/',
-                $message,
-                $matches
-            )
-        ) {
+    //     if (
+    //         !preg_match(
+    //             '/(tren|tu)\s*(\d+(\.\d+)?)/',
+    //             $message,
+    //             $matches
+    //         )
+    //     ) {
 
-            return null;
-        }
+    //         return null;
+    //     }
 
-        return (float)
-        $matches[2];
-    }
+    //     return (float)
+    //     $matches[2];
+    // }
 
     /*
     =========================
