@@ -4,12 +4,14 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use OpenAI\Laravel\Facades\OpenAI;
 use App\Services\ChatbotContextService;
 use App\Services\ChatbotIntentService;
 use App\Services\ChatbotBookingService;
 use App\Services\ChatbotSessionService;
 use App\Services\ChatbotMovieService;
+use App\Services\OpenAIIntentService;
 
 class ChatbotAIController extends Controller
 {
@@ -18,19 +20,22 @@ class ChatbotAIController extends Controller
     protected $bookingService;
     protected $sessionService;
     protected $movieService;
+    protected $openAIIntentService;
 
     public function __construct(
         ChatbotContextService $contextService,
         ChatbotIntentService $intentService,
         ChatbotBookingService $bookingService,
         ChatbotSessionService $sessionService,
-        ChatbotMovieService $movieService
+        ChatbotMovieService $movieService,
+        OpenAIIntentService $openAIIntentService
     ) {
         $this->contextService = $contextService;
         $this->intentService = $intentService;
         $this->bookingService = $bookingService;
         $this->sessionService = $sessionService;
         $this->movieService = $movieService;
+        $this->openAIIntentService = $openAIIntentService;
     }
 
     public function ask(Request $request)
@@ -38,6 +43,16 @@ class ChatbotAIController extends Controller
         $request->validate([
             'message' => 'required|string|max:500'
         ]);
+
+        $aiIntent =
+            $this->openAIIntentService
+            ->parse(
+                $request->message
+            );
+
+        $aiIntentName =
+            $aiIntent['intent']
+            ?? 'unknown';
 
         $session =
             $this->sessionService
@@ -121,6 +136,15 @@ KHUYẾN MÃI
 {$promoText}
 
 ";
+
+        Log::info('RULE INTENT', [
+            'intent' => $intentName
+        ]);
+
+        Log::info('AI INTENT', [
+            'intent' => $aiIntentName,
+            'data' => $aiIntent
+        ]);
 
         if (
             $intentName === 'book_ticket'
@@ -236,10 +260,8 @@ KHUYẾN MÃI
 
         // recommendMovies
         if (
-            $this->movieService
-            ->detectRecommendation(
-                $request->message
-            )
+            $aiIntentName ===
+            'recommendation'
         ) {
 
             return response()->json([
@@ -250,7 +272,7 @@ KHUYẾN MÃI
                 'movies' =>
                 $this->movieService
                     ->getRecommendedMovies(
-                        $request->message
+                        $aiIntent['movie']
                     )
             ]);
         }

@@ -4,7 +4,6 @@ namespace App\Services;
 
 use App\Models\Phim;
 use App\Helpers\TextHelper;
-use App\Helpers\RecommendationTextHelper;
 
 class ChatbotMovieService
 {
@@ -226,13 +225,8 @@ class ChatbotMovieService
     =========================
     */
     public function getRecommendedMovies(
-        string $message
+        string $movieName
     ) {
-        $movieName =
-            RecommendationTextHelper::extractMovieNameFromRecommendation(
-                $message
-            );
-
         $movie =
             $this->findMovie(
                 $movieName
@@ -256,6 +250,7 @@ class ChatbotMovieService
                 'theLoai',
                 function ($query)
                 use ($genreIds) {
+
                     $query->whereIn(
                         'the_loai.maTheLoai',
                         $genreIds
