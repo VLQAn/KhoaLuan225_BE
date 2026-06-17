@@ -52,6 +52,38 @@ User: đạo diễn Star Wars
   "infoType":"director"
 }
 
+User: diễn viên Star Wars
+
+{
+  "intent":"movie_info",
+  "movie":"Star Wars",
+  "infoType":"actor"
+}
+
+User: ai đạo diễn Star Wars
+
+{
+  "intent":"movie_info",
+  "movie":"Star Wars",
+  "infoType":"director"
+}
+
+User: Star Wars nói về gì
+
+{
+  "intent":"movie_info",
+  "movie":"Star Wars",
+  "infoType":"summary"
+}
+
+User: diễn viên trong Star Wars
+
+{
+  "intent":"movie_info",
+  "movie":"Star Wars",
+  "infoType":"actor"
+}
+
 User: phim trên 8 điểm
 
 {
@@ -64,6 +96,27 @@ User: phim hành động
 {
   "intent":"genre_filter",
   "genre":"Hành động"
+}
+
+User: có phim hành động không
+
+{
+  "intent":"genre_filter",
+  "genre":"Hành động"
+}
+
+User: tôi muốn xem phim kinh dị
+
+{
+  "intent":"genre_filter",
+  "genre":"Kinh dị"
+}
+
+User: phim hài
+
+{
+  "intent":"genre_filter",
+  "genre":"Hài"
 }
 
 User: gợi ý phim giống Star Wars

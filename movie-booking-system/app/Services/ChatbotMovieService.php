@@ -336,28 +336,36 @@ class ChatbotMovieService
             : null;
     }
 
-    public function getMovieInfo(
-        string $message
+    public function getMovieByName(
+        string $movieName
     ) {
-        $movie =
-            $this->findMovie(
-                $message
-            );
-
-        if (!$movie) {
-            return null;
-        }
-
-        $infoType =
-            $this->detectMovieInfoIntent(
-                $message
-            );
-
-        return [
-            'movie' => $movie,
-            'infoType' => $infoType
-        ];
+        return $this->findMovie(
+            $movieName
+        );
     }
+
+    // public function getMovieInfo(
+    //     string $message
+    // ) {
+    //     $movie =
+    //         $this->findMovie(
+    //             $message
+    //         );
+
+    //     if (!$movie) {
+    //         return null;
+    //     }
+
+    //     $infoType =
+    //         $this->detectMovieInfoIntent(
+    //             $message
+    //         );
+
+    //     return [
+    //         'movie' => $movie,
+    //         'infoType' => $infoType
+    //     ];
+    // }
 
     public function getMoviesByRating(
         float $rating
@@ -424,43 +432,43 @@ class ChatbotMovieService
             ->get();
     }
 
-    public function detectMovieInfoIntent(
-        string $message
-    ) {
-        $message =
-            TextHelper::normalize(
-                $message
-            );
+    // public function detectMovieInfoIntent(
+    //     string $message
+    // ) {
+    //     $message =
+    //         TextHelper::normalize(
+    //             $message
+    //         );
 
-        if (
-            str_contains(
-                $message,
-                'noi dung'
-            )
-        ) {
-            return 'summary';
-        }
+    //     if (
+    //         str_contains(
+    //             $message,
+    //             'noi dung'
+    //         )
+    //     ) {
+    //         return 'summary';
+    //     }
 
-        if (
-            str_contains(
-                $message,
-                'dao dien'
-            )
-        ) {
-            return 'director';
-        }
+    //     if (
+    //         str_contains(
+    //             $message,
+    //             'dao dien'
+    //         )
+    //     ) {
+    //         return 'director';
+    //     }
 
-        if (
-            str_contains(
-                $message,
-                'dien vien'
-            )
-        ) {
-            return 'actor';
-        }
+    //     if (
+    //         str_contains(
+    //             $message,
+    //             'dien vien'
+    //         )
+    //     ) {
+    //         return 'actor';
+    //     }
 
-        return null;
-    }
+    //     return null;
+    // }
 
     /*
     =========================

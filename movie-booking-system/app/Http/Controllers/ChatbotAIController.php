@@ -278,40 +278,97 @@ KHUYẾN MÃI
         }
 
         // movieInfo
-        $movieInfo =
-            $this->movieService
-            ->getMovieInfo(
-                $request->message
-            );
+        // $movieInfo =
+        //     $this->movieService
+        //     ->getMovieInfo(
+        //         $request->message
+        //     );
 
 
-        if ($movieInfo) {
+        // if ($movieInfo) {
 
-            $movie = $movieInfo['movie'];
+        //     $movie = $movieInfo['movie'];
+
+        //     return response()->json([
+
+        //         'type' => 'movie_info',
+
+        //         'infoType' => $movieInfo['infoType'],
+
+        //         'movie' => [
+
+        //             'id' => $movie->maPhim,
+
+        //             'title' => $movie->tieuDe,
+
+        //             'description' => $movie->moTa,
+
+        //             'director' => $movie->daoDien,
+
+        //             'actors' => $movie->dienVien,
+
+        //             'rating' => $movie->danhGia,
+
+        //             'duration' => $movie->thoiLuong,
+
+        //             'status' => $movie->trangThai
+        //         ]
+        //     ]);
+        // }
+
+        if (
+            $aiIntentName ===
+            'movie_info'
+        ) {
+
+            $movie =
+                $this->movieService
+                ->getMovieByName(
+                    $aiIntent['movie']
+                );
+
+            if (!$movie) {
+
+                return response()->json([
+
+                    'type' => 'movie_not_found'
+                ]);
+            }
 
             return response()->json([
 
-                'type' => 'movie_info',
+                'type' =>
+                'movie_info',
 
-                'infoType' => $movieInfo['infoType'],
+                'infoType' =>
+                $aiIntent['infoType']
+                    ?? null,
 
                 'movie' => [
 
-                    'id' => $movie->maPhim,
+                    'id' =>
+                    $movie->maPhim,
 
-                    'title' => $movie->tieuDe,
+                    'title' =>
+                    $movie->tieuDe,
 
-                    'description' => $movie->moTa,
+                    'description' =>
+                    $movie->moTa,
 
-                    'director' => $movie->daoDien,
+                    'director' =>
+                    $movie->daoDien,
 
-                    'actors' => $movie->dienVien,
+                    'actors' =>
+                    $movie->dienVien,
 
-                    'rating' => $movie->danhGia,
+                    'rating' =>
+                    $movie->danhGia,
 
-                    'duration' => $movie->thoiLuong,
+                    'duration' =>
+                    $movie->thoiLuong,
 
-                    'status' => $movie->trangThai
+                    'status' =>
+                    $movie->trangThai
                 ]
             ]);
         }
