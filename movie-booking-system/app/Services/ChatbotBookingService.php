@@ -8,6 +8,7 @@ use App\Services\ChatbotSessionService;
 
 class ChatbotBookingService
 {
+    
     protected $sessionService;
 
     public function __construct(
@@ -18,32 +19,13 @@ class ChatbotBookingService
             $sessionService;
     }
 
-    public function findMovie(
-        string $message
-    ) {
-        $movies = Phim::all();
-
-        foreach ($movies as $movie) {
-
-            if (
-                str_contains(
-                    mb_strtolower($movie->tieuDe),
-                    mb_strtolower($message)
-                )
-            ) {
-
-                return $movie;
-            }
-        }
-
-        return null;
-    }
-
+    // handle()
     public function handle(
         string $message,
         ?int $userId = null,
         array $aiIntent = []
     ) {
+
         $session =
             $this->sessionService
             ->getOrCreate($userId);
@@ -60,6 +42,19 @@ class ChatbotBookingService
             );
         }
 
+        return $this->handleBookingStart(
+            $message,
+            $session,
+            $aiIntent
+        );
+    }
+
+    //  handleBookingStart()
+    private function handleBookingStart(
+        string $message,
+        $session,
+        array $aiIntent
+    ) {
         $movieName =
             $aiIntent['movie']
             ?? null;
@@ -97,7 +92,6 @@ class ChatbotBookingService
             ];
         }
 
-        // lưu phim đang chọn
         $this->sessionService
             ->setMovie(
                 $session->maPhien,
@@ -153,50 +147,24 @@ class ChatbotBookingService
             $movie->tieuDe,
 
             'reply' =>
-            "🎟️ Hiện {$movie->tieuDe} đang có các xuất chiếu",
+            "🎟️ Hiện {$movie->tieuDe} đang có các suất chiếu",
 
             'showtimes' =>
             $showtimes
         ];
     }
 
-    private function isSelectingShowtime(
-        $session
-    ) {
-        $data =
-            $session->duLieu
-            ?? [];
-
-        return ($data['booking_step']
-            ?? null)
-            ===
-            'select_showtime';
-    }
-
-    private function extractNumber(
-        string $message
-    ) {
-        preg_match(
-            '/\d+/',
-            $message,
-            $matches
-        );
-
-        return
-            $matches[0]
-            ?? null;
-    }
-
+    // handleShowtimeSelection()
     private function handleShowtimeSelection(
         string $message,
         $session
     ) {
-        $number =
-            $this->extractNumber(
+        $selection =
+            $this->extractShowtimeSelection(
                 $message
             );
 
-        if (!$number) {
+        if (!$selection) {
 
             return [
 
@@ -226,7 +194,7 @@ class ChatbotBookingService
             ->get();
 
         $index =
-            $number - 1;
+            $selection - 1;
 
         if (
             !isset(
@@ -269,7 +237,65 @@ class ChatbotBookingService
             $showtime->maXuatChieu,
 
             'reply' =>
-            '🎟️ Đã chọn suất chiếu. Chuyển sang chọn ghế.'
+            '🎟️ Đã chọn suất chiếu. Vui lòng chọn ghế.'
         ];
+    }
+
+    // findMovie()
+public function findMovie(
+        string $message
+    ) {
+        $movies = Phim::all();
+
+        foreach ($movies as $movie) {
+
+            if (
+                str_contains(
+                    mb_strtolower($movie->tieuDe),
+                    mb_strtolower($message)
+                )
+            ) {
+
+                return $movie;
+            }
+        }
+
+        return null;
+    }
+
+    // isSelectingShowtime()
+    private function isSelectingShowtime(
+        $session
+    ) {
+        $data =
+            $session->duLieu
+            ?? [];
+
+        return ($data['booking_step']
+            ?? null)
+            ===
+            'select_showtime';
+    }
+
+    // extractShowtimeSelection()
+    private function extractShowtimeSelection(
+        string $message
+    ): ?int {
+
+        $message =
+            mb_strtolower($message);
+
+        if (
+            preg_match(
+                '/(?:suat|xuat)?\s*(?:so\s*)?(\d+)/u',
+                $message,
+                $matches
+            )
+        ) {
+
+            return (int) $matches[1];
+        }
+
+        return null;
     }
 }
