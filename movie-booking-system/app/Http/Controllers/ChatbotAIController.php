@@ -435,29 +435,26 @@ KHUYẾN MÃI
 
                 'movie' => [
 
-                    'id' =>
-                    $movie->maPhim,
+                    'id' => $movie->maPhim,
 
                     'title' =>
                     $movie->tieuDe,
 
-                    'description' =>
-                    $movie->moTa,
+                    'poster' => $movie->anhPoster,
 
-                    'director' =>
-                    $movie->daoDien,
+                    'genres' => $movie->theLoai,
 
-                    'actors' =>
-                    $movie->dienVien,
+                    'description' => $movie->moTa,
 
-                    'rating' =>
-                    $movie->danhGia,
+                    'director' => $movie->daoDien,
 
-                    'duration' =>
-                    $movie->thoiLuong,
+                    'actors' => $movie->dienVien,
 
-                    'status' =>
-                    $movie->trangThai
+                    'rating' => $movie->danhGia,
+
+                    'duration' => $movie->thoiLuong,
+
+                    'status' => $movie->trangThai
                 ]
             ]);
         }
