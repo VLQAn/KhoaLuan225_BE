@@ -14,12 +14,17 @@ class ChatbotBookingService
 
     protected $sessionService;
 
-    public function __construct(
-        ChatbotSessionService $sessionService
-    ) {
+    protected $datVeService;
 
+    public function __construct(
+        ChatbotSessionService $sessionService,
+        DatVeService $datVeService
+    ) {
         $this->sessionService =
             $sessionService;
+
+        $this->datVeService =
+            $datVeService;
     }
 
     // handle()
@@ -33,29 +38,100 @@ class ChatbotBookingService
             $this->sessionService
             ->getOrCreate($userId);
 
+        $data =
+            $session->duLieu
+            ?? [];
+
         $step =
-            $session->duLieu['booking_step']
+            $data['booking_step']
             ?? null;
 
-        if ($step === 'select_showtime') {
-            return $this->handleShowtimeSelection(
-                $message,
-                $session
-            );
+        Log::info('BOOKING_HANDLE', [
+            'step' => $step,
+            'message' => $message
+        ]);
+
+        if (
+            $this->isCancelMessage(
+                $message
+            )
+        ) {
+
+            $this->sessionService
+                ->clearSession(
+                    $session->maPhien
+                );
+
+            Log::info('BOOKING_SESSION_RESET');
+
+            return [
+
+                'type' =>
+                'booking_cancel',
+
+                'reply' =>
+                '✅ Đã hủy phiên đặt vé hiện tại. Bạn muốn đặt vé phim nào?'
+            ];
         }
 
-        if ($step === 'select_seat') {
-            return $this->handleSeatSelection(
-                $message,
-                $session
-            );
+        if (
+            $step &&
+            $this->isNewBookingRequest(
+                $message
+            )
+        ) {
+
+            $this->sessionService
+                ->clearSession(
+                    $session->maPhien
+                );
+
+            $session =
+                $this->sessionService
+                ->getOrCreate(
+                    $userId
+                );
+
+            $step = null;
+
+            Log::info('BOOKING_RESTART');
         }
 
-        return $this->handleBookingStart(
-            $message,
-            $session,
-            $aiIntent
-        );
+        switch ($step) {
+            case 'select_showtime':
+
+                return
+                    $this->handleShowtimeSelection(
+                        $message,
+                        $session
+                    );
+
+            case 'select_seat':
+
+                return
+                    $this->handleSeatSelection(
+                        $message,
+                        $session
+                    );
+
+            case 'confirm_booking':
+
+                return
+                    $this->handleConfirmBooking(
+                        $message,
+                        $session,
+                        $userId
+                    );
+
+            default:
+
+                return
+                    $this->handleBookingStart(
+                        $message,
+                        $session,
+                        $aiIntent
+                    );
+        }
     }
 
     //  handleBookingStart()
@@ -64,6 +140,10 @@ class ChatbotBookingService
         $session,
         array $aiIntent
     ) {
+        Log::info('AI_MOVIE', [
+            'movie' => $aiIntent['movie'] ?? null
+        ]);
+
         $movieName =
             $aiIntent['movie']
             ?? null;
@@ -282,18 +362,31 @@ class ChatbotBookingService
     }
 
     // findMovie()
-    public function findMovie(
-        string $message
-    ) {
-        $movies = Phim::all();
+    public function findMovie(string $message)
+    {
+        Log::info('FIND_MOVIE', [
+            'search' => $message
+        ]);
 
-        $message =
-            mb_strtolower(trim($message));
+        $message = mb_strtolower(trim($message));
+
+        // loại bỏ từ khóa đặt vé
+        $message = preg_replace(
+            '/đặt\s*\d*\s*vé|dat\s*\d*\s*ve/ui',
+            '',
+            $message
+        );
+
+        $message = trim($message);
+
+        $movies = Phim::all();
 
         foreach ($movies as $movie) {
 
             $title =
-                mb_strtolower($movie->tieuDe);
+                mb_strtolower(
+                    trim($movie->tieuDe)
+                );
 
             if (
                 str_contains(
@@ -301,26 +394,20 @@ class ChatbotBookingService
                     $message
                 )
             ) {
+                return $movie;
+            }
 
+            if (
+                str_contains(
+                    $message,
+                    $title
+                )
+            ) {
                 return $movie;
             }
         }
 
         return null;
-    }
-
-    // isSelectingShowtime()
-    private function isSelectingShowtime(
-        $session
-    ) {
-        $data =
-            $session->duLieu
-            ?? [];
-
-        return ($data['booking_step']
-            ?? null)
-            ===
-            'select_showtime';
     }
 
     // extractShowtimeSelection()
@@ -375,6 +462,76 @@ class ChatbotBookingService
             ?? [];
     }
 
+    private function isConfirmMessage(
+        string $message
+    ): bool {
+
+        $message =
+            mb_strtolower(
+                trim($message)
+            );
+
+        $confirmWords = [
+
+            'ok',
+            'oke',
+
+            'dong y',
+            'đồng ý',
+
+            'xac nhan',
+            'xác nhận',
+
+            'dat ve',
+            'đặt vé',
+
+            'yes'
+        ];
+
+        return
+            str_contains($message, 'xac nhan')
+            ||
+            str_contains($message, 'xác nhận')
+            ||
+            str_contains($message, 'dong y')
+            ||
+            str_contains($message, 'đồng ý');
+    }
+
+    private function isCancelMessage(
+        string $message
+    ): bool {
+        $message =
+            mb_strtolower(
+                trim($message)
+            );
+
+        $cancelWords = [
+
+            'huy',
+            'hủy',
+
+            'huy dat ve',
+            'hủy đặt vé',
+
+            'thoat',
+            'thoát',
+
+            'bat dau lai',
+            'bắt đầu lại',
+
+            'reset',
+
+            'dat ve moi',
+            'đặt vé mới'
+        ];
+
+        return in_array(
+            $message,
+            $cancelWords
+        );
+    }
+
     private function parseSeat(
         string $seatName
     ) {
@@ -410,7 +567,9 @@ class ChatbotBookingService
             );
 
         if (empty($seats)) {
+
             return [
+
                 'type' =>
                 'booking',
 
@@ -442,8 +601,6 @@ class ChatbotBookingService
         $seatIds = [];
 
         foreach ($seats as $seatName) {
-            $seatIds[] =
-                $seat->maGhe;
 
             $parsed =
                 $this->parseSeat(
@@ -451,6 +608,7 @@ class ChatbotBookingService
                 );
 
             if (!$parsed) {
+
                 return [
 
                     'type' =>
@@ -461,6 +619,35 @@ class ChatbotBookingService
                 ];
             }
 
+            // Tìm ghế trước
+            $seat =
+                Ghe::where(
+                    'maPhong',
+                    $showtime->maPhong
+                )
+                ->where(
+                    'hangGhe',
+                    $parsed['row']
+                )
+                ->where(
+                    'soGhe',
+                    $parsed['number']
+                )
+                ->first();
+
+            if (!$seat) {
+
+                return [
+
+                    'type' =>
+                    'booking',
+
+                    'reply' =>
+                    "Ghế {$seatName} không tồn tại."
+                ];
+            }
+
+            // Kiểm tra ghế đã được đặt chưa
             $booked =
                 Ve::where(
                     'maXuatChieu',
@@ -480,6 +667,7 @@ class ChatbotBookingService
                 ->exists();
 
             if ($booked) {
+
                 return [
 
                     'type' =>
@@ -490,31 +678,8 @@ class ChatbotBookingService
                 ];
             }
 
-            $seat =
-                Ghe::where(
-                    'maPhong',
-                    $showtime->maPhong
-                )
-                ->where(
-                    'hangGhe',
-                    $parsed['row']
-                )
-                ->where(
-                    'soGhe',
-                    $parsed['number']
-                )
-                ->first();
-
-            if (!$seat) {
-                return [
-
-                    'type' =>
-                    'booking',
-
-                    'reply' =>
-                    "Ghế {$seatName} không tồn tại."
-                ];
-            }
+            $seatIds[] =
+                $seat->maGhe;
         }
 
         $quantity =
@@ -523,10 +688,11 @@ class ChatbotBookingService
 
         if (
             count($seats)
-            !=
-            $quantity
+            != $quantity
         ) {
+
             return [
+
                 'type' =>
                 'booking',
 
@@ -566,6 +732,109 @@ class ChatbotBookingService
                 . implode(', ', $seats)
                 . '. Bạn có muốn xác nhận đặt vé không?'
         ];
+    }
+
+    private function handleConfirmBooking(
+        string $message,
+        $session,
+        ?int $userId = null
+    ) {
+        if (
+            !$this->isConfirmMessage(
+                $message
+            )
+        ) {
+            return [
+
+                'type' =>
+                'booking',
+
+                'reply' =>
+                'Vui lòng nhập "xác nhận" để hoàn tất đặt vé.'
+            ];
+        }
+
+        $data =
+            $session->duLieu
+            ?? [];
+
+        try {
+
+            $result =
+                $this->datVeService
+                ->datVe([
+                    'maNguoiDung' =>
+                    $userId,
+
+                    'maXuatChieu' =>
+                    $session->xuatChieuDangChon,
+
+                    'danhSachGhe' =>
+                    $data['selected_seat_ids']
+                        ?? []
+                ]);
+
+            $this->sessionService
+                ->setData(
+                    $session->maPhien,
+                    'maHoaDon',
+                    $result['hoaDon']->maHoaDon
+                );
+
+            $this->sessionService
+                ->setData(
+                    $session->maPhien,
+                    'booking_step',
+                    'payment'
+                );
+
+            return [
+
+                'type' =>
+                'booking_payment',
+
+                'invoiceId' =>
+                $result['hoaDon']->maHoaDon,
+
+                'total' =>
+                $result['tongThanhToan'],
+
+                'reply' =>
+                '🎟️ Đặt vé thành công. Tổng tiền: '
+                    . number_format(
+                        $result['tongThanhToan']
+                    )
+                    . ' VNĐ'
+            ];
+        } catch (\Exception $e) {
+
+            return [
+
+                'type' =>
+                'booking',
+
+                'reply' =>
+                $e->getMessage()
+            ];
+        }
+    }
+
+    private function isNewBookingRequest(
+        string $message
+    ): bool {
+        $message =
+            mb_strtolower(trim($message));
+
+        return
+            preg_match(
+                '/đặt.*vé/u',
+                $message
+            )
+            ||
+            preg_match(
+                '/dat.*ve/i',
+                $message
+            );
     }
 
     private function findShowtimeByDate(

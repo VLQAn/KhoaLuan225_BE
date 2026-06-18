@@ -83,15 +83,19 @@ class ChatbotAIController extends Controller
             $data['booking_step']
             ?? null;
 
+        Log::info('CURRENT_STEP', [
+            'step' => $currentStep,
+            'data' => $data
+        ]);
+
         if (
             in_array(
                 $currentStep,
                 [
                     'select_showtime',
                     'select_seat',
-                    // 'confirm_booking',
-                    // 'payment',
-                    // 'completed'
+                    'confirm_booking',
+                    'payment'
                 ]
             )
         ) {
@@ -104,6 +108,10 @@ class ChatbotAIController extends Controller
                 );
 
             $session->refresh();
+
+            Log::info('AUTH_USER', [
+                'id' => Auth::id()
+            ]);
 
             $bookingData =
                 $this->bookingService
@@ -231,6 +239,10 @@ KHUYẾN MÃI
         if (
             $aiIntentName  === 'book_ticket'
         ) {
+
+            Log::info('AUTH_USER', [
+                'id' => Auth::id()
+            ]);
 
             $bookingData =
                 $this->bookingService

@@ -207,13 +207,11 @@ class DatVeService
             $hoaDon = HoaDon::create([
 
                 'maNguoiDung' =>
-                Auth::id(),
+                $data['maNguoiDung'],
 
                 'maKhuyenMai' =>
-                $data['maKhuyenMai']
-                    ?? null,
+                $data['maKhuyenMai'] ?? null,
 
-                // chưa thanh toán nên để null
                 'gioThanhToan' => null,
 
                 'tongTien' =>

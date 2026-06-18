@@ -378,7 +378,8 @@ Route::middleware('auth:sanctum')
 | CHAT BOT
 |--------------------------------------------------------------------------
 */
-Route::post(
-    '/chatbot/ask',
-    [ChatbotAIController::class, 'ask']
-);
+Route::middleware('auth:sanctum')
+    ->post(
+        '/chatbot/ask',
+        [ChatbotAIController::class, 'ask']
+    );
