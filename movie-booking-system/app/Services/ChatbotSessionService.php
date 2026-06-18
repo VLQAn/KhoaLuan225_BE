@@ -135,6 +135,9 @@ class ChatbotSessionService
             null,
 
             'xuatChieuDangChon' =>
+            null,
+
+            'duLieu' =>
             null
         ]);
     }

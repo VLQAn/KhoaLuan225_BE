@@ -5,10 +5,11 @@ namespace App\Services;
 use App\Models\Phim;
 use App\Models\XuatChieu;
 use App\Services\ChatbotSessionService;
+use Illuminate\Support\Facades\Log;
 
 class ChatbotBookingService
 {
-    
+
     protected $sessionService;
 
     public function __construct(
@@ -67,6 +68,11 @@ class ChatbotBookingService
                 $this->findMovie(
                     $movieName
                 );
+
+            Log::info('BOOKING_MOVIE', [
+                'movieId' => $movie?->maPhim,
+                'title'   => $movie?->tieuDe
+            ]);
         }
 
         if (!$movie) {
@@ -154,27 +160,45 @@ class ChatbotBookingService
         ];
     }
 
-    // handleShowtimeSelection()
-    private function handleShowtimeSelection(
+    // findSelectedShowtime()
+    private function findSelectedShowtime(
         string $message,
-        $session
+        $showtimes
     ) {
         $selection =
             $this->extractShowtimeSelection(
                 $message
             );
 
+        Log::info('SHOWTIME_SELECTION', [
+            'message' => $message,
+            'selection' => $selection,
+            'count' => $showtimes->count()
+        ]);
+
         if (!$selection) {
-
-            return [
-
-                'type' =>
-                'booking',
-
-                'reply' =>
-                'Vui lòng chọn số thứ tự suất chiếu.'
-            ];
+            return null;
         }
+
+        $index =
+            $selection - 1;
+
+        if (
+            !isset(
+                $showtimes[$index]
+            )
+        ) {
+            return null;
+        }
+
+        return $showtimes[$index];
+    }
+
+    // handleShowtimeSelection()
+    private function handleShowtimeSelection(
+        string $message,
+        $session
+    ) {
 
         $movieId =
             $session->phimDangChon;
@@ -186,21 +210,28 @@ class ChatbotBookingService
             )
             ->where(
                 'trangThai',
-                'Sap_Chieu'
+                'sap_Chieu'
             )
             ->orderBy(
                 'thoiGianBatDau'
             )
             ->get();
 
-        $index =
-            $selection - 1;
+        Log::info('MOVIE_ID', [
+            'movieId' => $movieId
+        ]);
 
-        if (
-            !isset(
-                $showtimes[$index]
-            )
-        ) {
+        Log::info('SHOWTIMES_FOUND', [
+            'count' => $showtimes->count()
+        ]);
+
+        $showtime =
+            $this->findSelectedShowtime(
+                $message,
+                $showtimes
+            );
+
+        if (!$showtime) {
 
             return [
 
@@ -208,12 +239,9 @@ class ChatbotBookingService
                 'booking',
 
                 'reply' =>
-                'Số thứ tự không hợp lệ.'
+                'Không xác định được suất chiếu. Vui lòng chọn lại.'
             ];
         }
-
-        $showtime =
-            $showtimes[$index];
 
         $this->sessionService
             ->setShowtime(
@@ -236,23 +264,33 @@ class ChatbotBookingService
             'showtimeId' =>
             $showtime->maXuatChieu,
 
+            'quantity' =>
+            $session->duLieu['quantity']
+                ?? 1,
+
             'reply' =>
             '🎟️ Đã chọn suất chiếu. Vui lòng chọn ghế.'
         ];
     }
 
     // findMovie()
-public function findMovie(
+    public function findMovie(
         string $message
     ) {
         $movies = Phim::all();
 
+        $message =
+            mb_strtolower(trim($message));
+
         foreach ($movies as $movie) {
+
+            $title =
+                mb_strtolower($movie->tieuDe);
 
             if (
                 str_contains(
-                    mb_strtolower($movie->tieuDe),
-                    mb_strtolower($message)
+                    $title,
+                    $message
                 )
             ) {
 
@@ -283,11 +321,27 @@ public function findMovie(
     ): ?int {
 
         $message =
-            mb_strtolower($message);
+            mb_strtolower(
+                trim($message)
+            );
 
+        // chỉ nhập số
         if (
             preg_match(
-                '/(?:suat|xuat)?\s*(?:so\s*)?(\d+)/u',
+                '/^\d+$/',
+                $message
+            )
+        ) {
+            return (int) $message;
+        }
+
+        // chọn 2
+        // xuất 2
+        // suất số 2
+        // mình chọn xuất 2
+        if (
+            preg_match(
+                '/(?:chon|chon xuat|xuat|suat)?\s*(?:so\s*)?(\d+)/u',
                 $message,
                 $matches
             )
@@ -297,5 +351,12 @@ public function findMovie(
         }
 
         return null;
+    }
+
+    private function findShowtimeByDate(
+        string $message,
+        $showtimes
+    ) {
+        // xử lý sau
     }
 }

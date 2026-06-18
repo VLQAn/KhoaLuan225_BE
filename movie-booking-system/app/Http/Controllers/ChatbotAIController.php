@@ -70,6 +70,62 @@ class ChatbotAIController extends Controller
             'message' => 'required|string|max:500'
         ]);
 
+        $session =
+            $this->sessionService
+            ->getOrCreate(
+                Auth::id()
+            );
+
+        $data =
+            $session->duLieu ?? [];
+
+        $currentStep =
+            $data['booking_step']
+            ?? null;
+
+        if (
+            in_array(
+                $currentStep,
+                [
+                    'select_showtime',
+                    'select_seat'
+                ]
+            )
+        ) {
+
+            $this->sessionService
+                ->saveMessage(
+                    $session->maPhien,
+                    'user',
+                    $request->message
+                );
+
+            $session->refresh();
+
+            $bookingData =
+                $this->bookingService
+                ->handle(
+                    $request->message,
+                    Auth::id()
+                );
+
+            if (
+                !empty($bookingData['reply'])
+            ) {
+
+                $this->sessionService
+                    ->saveMessage(
+                        $session->maPhien,
+                        'bot',
+                        $bookingData['reply']
+                    );
+            }
+
+            return response()->json(
+                $bookingData
+            );
+        }
+
         $aiIntent =
             $this->openAIIntentService
             ->parse(
@@ -79,12 +135,6 @@ class ChatbotAIController extends Controller
         $aiIntentName =
             $aiIntent['intent']
             ?? 'unknown';
-
-        $session =
-            $this->sessionService
-            ->getOrCreate(
-                Auth::id()
-            );
 
         $this->sessionService
             ->saveMessage(
