@@ -344,29 +344,6 @@ class ChatbotMovieService
         );
     }
 
-    // public function getMovieInfo(
-    //     string $message
-    // ) {
-    //     $movie =
-    //         $this->findMovie(
-    //             $message
-    //         );
-
-    //     if (!$movie) {
-    //         return null;
-    //     }
-
-    //     $infoType =
-    //         $this->detectMovieInfoIntent(
-    //             $message
-    //         );
-
-    //     return [
-    //         'movie' => $movie,
-    //         'infoType' => $infoType
-    //     ];
-    // }
-
     public function getMoviesByRating(
         float $rating
     ) {
