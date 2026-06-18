@@ -115,11 +115,12 @@ class ChatbotSessionService
             );
 
         $data =
-            $session->duLieu ?? [];
+            json_decode(
+                $session->duLieu ?? '{}',
+                true
+            );
 
-        return
-            $data[$key]
-            ?? null;
+        return $data[$key] ?? null;
     }
 
     public function clearSession(

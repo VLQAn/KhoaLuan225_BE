@@ -48,6 +48,18 @@ class ChatbotBookingService
             $this->sessionService
             ->getOrCreate($userId);
 
+        if (
+            $this->isSelectingShowtime(
+                $session
+            )
+        ) {
+
+            return $this->handleShowtimeSelection(
+                $message,
+                $session
+            );
+        }
+
         $movieName =
             $aiIntent['movie']
             ?? null;
@@ -141,10 +153,123 @@ class ChatbotBookingService
             $movie->tieuDe,
 
             'reply' =>
-            "🎟️ Các suất chiếu của {$movie->tieuDe}",
+            "🎟️ Hiện {$movie->tieuDe} đang có các xuất chiếu",
 
             'showtimes' =>
             $showtimes
+        ];
+    }
+
+    private function isSelectingShowtime(
+        $session
+    ) {
+        $data =
+            $session->duLieu
+            ?? [];
+
+        return ($data['booking_step']
+            ?? null)
+            ===
+            'select_showtime';
+    }
+
+    private function extractNumber(
+        string $message
+    ) {
+        preg_match(
+            '/\d+/',
+            $message,
+            $matches
+        );
+
+        return
+            $matches[0]
+            ?? null;
+    }
+
+    private function handleShowtimeSelection(
+        string $message,
+        $session
+    ) {
+        $number =
+            $this->extractNumber(
+                $message
+            );
+
+        if (!$number) {
+
+            return [
+
+                'type' =>
+                'booking',
+
+                'reply' =>
+                'Vui lòng chọn số thứ tự suất chiếu.'
+            ];
+        }
+
+        $movieId =
+            $session->phimDangChon;
+
+        $showtimes =
+            XuatChieu::where(
+                'maPhim',
+                $movieId
+            )
+            ->where(
+                'trangThai',
+                'Sap_Chieu'
+            )
+            ->orderBy(
+                'thoiGianBatDau'
+            )
+            ->get();
+
+        $index =
+            $number - 1;
+
+        if (
+            !isset(
+                $showtimes[$index]
+            )
+        ) {
+
+            return [
+
+                'type' =>
+                'booking',
+
+                'reply' =>
+                'Số thứ tự không hợp lệ.'
+            ];
+        }
+
+        $showtime =
+            $showtimes[$index];
+
+        $this->sessionService
+            ->setShowtime(
+                $session->maPhien,
+                $showtime->maXuatChieu
+            );
+
+        $this->sessionService
+            ->setData(
+                $session->maPhien,
+                'booking_step',
+                'select_seat'
+            );
+
+        return [
+
+            'type' =>
+            'booking_select_seat',
+
+            'showtimeId' =>
+            $showtime->maXuatChieu,
+
+            'reply' =>
+            '🎟️ Đã chọn suất chiếu. Chuyển sang chọn ghế.'
         ];
     }
 }
