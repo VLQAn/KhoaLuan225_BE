@@ -88,7 +88,10 @@ class ChatbotAIController extends Controller
                 $currentStep,
                 [
                     'select_showtime',
-                    'select_seat'
+                    'select_seat',
+                    // 'confirm_booking',
+                    // 'payment',
+                    // 'completed'
                 ]
             )
         ) {
@@ -255,27 +258,6 @@ KHUYẾN MÃI
             }
         }
 
-        // comparison
-        // $comparison =
-        //     $this->movieService
-        //     ->detectComparison(
-        //         $request->message
-        //     );
-
-        // if ($comparison) {
-
-        //     return response()->json([
-        //         'type' =>
-        //         'comparison',
-
-        //         'movie1' =>
-        //         $comparison['movie1'],
-
-        //         'movie2' =>
-        //         $comparison['movie2']
-        //     ]);
-        // }
-
         if (
             $aiIntentName ===
             'comparison'
@@ -318,27 +300,6 @@ KHUYẾN MÃI
         }
 
         // rating
-        // $rating =
-        //     $this->movieService
-        //     ->detectRating(
-        //         $request->message
-        //     );
-
-        // if ($rating) {
-
-        //     return response()->json([
-        //         'type' =>
-        //         'rating_filter',
-
-        //         'movies' =>
-        //         $this->movieService
-        //             ->getMoviesByRating(
-        //                 $rating
-        //             )
-        //     ]);
-        // }
-
-        // rating
         if (
             $aiIntentName ===
             'rating_filter'
@@ -360,30 +321,6 @@ KHUYẾN MÃI
                     )
             ]);
         }
-
-        // genre
-        // $genre =
-        //     $this->normalizeGenre(
-        //         $genre
-        //     );
-
-        // if ($genre) {
-
-        //     return response()->json([
-
-        //         'type' =>
-        //         'genre_filter',
-
-        //         'genre' =>
-        //         $genre,
-
-        //         'movies' =>
-        //         $this->movieService
-        //             ->getMoviesByGenre(
-        //                 $genre
-        //             )
-        //     ]);
-        // }
 
         // genre AI
         if (
@@ -411,22 +348,6 @@ KHUYẾN MÃI
                     )
             ]);
         }
-
-        // topMovies
-        // if (
-        //     $this->movieService
-        //     ->detectTopMovies(
-        //         $request->message
-        //     )
-        // ) {
-
-        //     return response()->json([
-        //         'type' => 'top_movies',
-        //         'movies' =>
-        //         $this->movieService
-        //             ->getTopMovies(5)
-        //     ]);
-        // }
 
         if (
             $aiIntentName ===
@@ -471,45 +392,6 @@ KHUYẾN MÃI
                     )
             ]);
         }
-
-        // movieInfo
-        // $movieInfo =
-        //     $this->movieService
-        //     ->getMovieInfo(
-        //         $request->message
-        //     );
-
-
-        // if ($movieInfo) {
-
-        //     $movie = $movieInfo['movie'];
-
-        //     return response()->json([
-
-        //         'type' => 'movie_info',
-
-        //         'infoType' => $movieInfo['infoType'],
-
-        //         'movie' => [
-
-        //             'id' => $movie->maPhim,
-
-        //             'title' => $movie->tieuDe,
-
-        //             'description' => $movie->moTa,
-
-        //             'director' => $movie->daoDien,
-
-        //             'actors' => $movie->dienVien,
-
-        //             'rating' => $movie->danhGia,
-
-        //             'duration' => $movie->thoiLuong,
-
-        //             'status' => $movie->trangThai
-        //         ]
-        //     ]);
-        // }
 
         if (
             $aiIntentName ===

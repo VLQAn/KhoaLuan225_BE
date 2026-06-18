@@ -6,6 +6,8 @@ use App\Models\Phim;
 use App\Models\XuatChieu;
 use App\Services\ChatbotSessionService;
 use Illuminate\Support\Facades\Log;
+use App\Models\Ghe;
+use App\Models\Ve;
 
 class ChatbotBookingService
 {
@@ -31,13 +33,19 @@ class ChatbotBookingService
             $this->sessionService
             ->getOrCreate($userId);
 
-        if (
-            $this->isSelectingShowtime(
-                $session
-            )
-        ) {
+        $step =
+            $session->duLieu['booking_step']
+            ?? null;
 
+        if ($step === 'select_showtime') {
             return $this->handleShowtimeSelection(
+                $message,
+                $session
+            );
+        }
+
+        if ($step === 'select_seat') {
+            return $this->handleSeatSelection(
                 $message,
                 $session
             );
@@ -351,6 +359,213 @@ class ChatbotBookingService
         }
 
         return null;
+    }
+
+    private function extractSeats(
+        string $message
+    ) {
+        preg_match_all(
+            '/[A-Z]\d+/i',
+            strtoupper($message),
+            $matches
+        );
+
+        return
+            $matches[0]
+            ?? [];
+    }
+
+    private function parseSeat(
+        string $seatName
+    ) {
+        preg_match(
+            '/([A-Z]+)(\d+)/',
+            strtoupper($seatName),
+            $matches
+        );
+
+        if (
+            count($matches) < 3
+        ) {
+            return null;
+        }
+
+        return [
+
+            'row' =>
+            $matches[1],
+
+            'number' =>
+            (int) $matches[2]
+        ];
+    }
+
+    private function handleSeatSelection(
+        string $message,
+        $session
+    ) {
+        $seats =
+            $this->extractSeats(
+                $message
+            );
+
+        if (empty($seats)) {
+            return [
+                'type' =>
+                'booking',
+
+                'reply' =>
+                'Vui lòng chọn ghế. Ví dụ: A1 A2'
+            ];
+        }
+
+        $showtime =
+            XuatChieu::with(
+                'phongChieu'
+            )
+            ->find(
+                $session->xuatChieuDangChon
+            );
+
+        if (!$showtime) {
+
+            return [
+
+                'type' =>
+                'booking',
+
+                'reply' =>
+                'Không tìm thấy suất chiếu.'
+            ];
+        }
+
+        $seatIds = [];
+
+        foreach ($seats as $seatName) {
+            $seatIds[] =
+                $seat->maGhe;
+
+            $parsed =
+                $this->parseSeat(
+                    $seatName
+                );
+
+            if (!$parsed) {
+                return [
+
+                    'type' =>
+                    'booking',
+
+                    'reply' =>
+                    "Ghế {$seatName} không hợp lệ."
+                ];
+            }
+
+            $booked =
+                Ve::where(
+                    'maXuatChieu',
+                    $session->xuatChieuDangChon
+                )
+                ->where(
+                    'maGhe',
+                    $seat->maGhe
+                )
+                ->whereIn(
+                    'trangThai',
+                    [
+                        'Dang_Chon',
+                        'Da_Dat'
+                    ]
+                )
+                ->exists();
+
+            if ($booked) {
+                return [
+
+                    'type' =>
+                    'booking',
+
+                    'reply' =>
+                    "Ghế {$seatName} đã có người chọn."
+                ];
+            }
+
+            $seat =
+                Ghe::where(
+                    'maPhong',
+                    $showtime->maPhong
+                )
+                ->where(
+                    'hangGhe',
+                    $parsed['row']
+                )
+                ->where(
+                    'soGhe',
+                    $parsed['number']
+                )
+                ->first();
+
+            if (!$seat) {
+                return [
+
+                    'type' =>
+                    'booking',
+
+                    'reply' =>
+                    "Ghế {$seatName} không tồn tại."
+                ];
+            }
+        }
+
+        $quantity =
+            $session->duLieu['quantity']
+            ?? 1;
+
+        if (
+            count($seats)
+            !=
+            $quantity
+        ) {
+            return [
+                'type' =>
+                'booking',
+
+                'reply' =>
+                "Bạn đã đặt {$quantity} vé nên cần chọn {$quantity} ghế."
+            ];
+        }
+
+        $this->sessionService
+            ->setData(
+                $session->maPhien,
+                'selected_seats',
+                $seats
+            );
+
+        $this->sessionService
+            ->setData(
+                $session->maPhien,
+                'selected_seat_ids',
+                $seatIds
+            );
+
+        $this->sessionService
+            ->setData(
+                $session->maPhien,
+                'booking_step',
+                'confirm_booking'
+            );
+
+        return [
+
+            'type' =>
+            'booking_confirm',
+
+            'reply' =>
+            '✅ Đã chọn ghế '
+                . implode(', ', $seats)
+                . '. Bạn có muốn xác nhận đặt vé không?'
+        ];
     }
 
     private function findShowtimeByDate(
