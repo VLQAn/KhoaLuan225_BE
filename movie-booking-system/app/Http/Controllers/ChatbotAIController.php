@@ -12,6 +12,7 @@ use App\Services\ChatbotBookingService;
 use App\Services\ChatbotSessionService;
 use App\Services\ChatbotMovieService;
 use App\Services\OpenAIIntentService;
+use App\Services\SmartBookingService;
 
 class ChatbotAIController extends Controller
 {
@@ -21,6 +22,7 @@ class ChatbotAIController extends Controller
     protected $sessionService;
     protected $movieService;
     protected $openAIIntentService;
+    protected $smartBookingService;
 
     public function __construct(
         ChatbotContextService $contextService,
@@ -28,7 +30,8 @@ class ChatbotAIController extends Controller
         ChatbotBookingService $bookingService,
         ChatbotSessionService $sessionService,
         ChatbotMovieService $movieService,
-        OpenAIIntentService $openAIIntentService
+        OpenAIIntentService $openAIIntentService,
+        SmartBookingService $smartBookingService
     ) {
         $this->contextService = $contextService;
         $this->intentService = $intentService;
@@ -36,6 +39,7 @@ class ChatbotAIController extends Controller
         $this->sessionService = $sessionService;
         $this->movieService = $movieService;
         $this->openAIIntentService = $openAIIntentService;
+        $this->smartBookingService = $smartBookingService;
     }
 
     private function normalizeGenre(
@@ -77,8 +81,8 @@ class ChatbotAIController extends Controller
             );
 
         // Parse duLieu JSON string đúng cách - handle both array and string
-        $data = is_array($session->duLieu) 
-            ? $session->duLieu 
+        $data = is_array($session->duLieu)
+            ? $session->duLieu
             : json_decode(
                 $session->duLieu ?? '{}',
                 true
@@ -243,6 +247,27 @@ KHUYẾN MÃI
         );
 
         if (
+            $aiIntentName === 'book_ticket'
+            &&
+            (
+                !empty($aiIntent['city'])
+                ||
+                !empty($aiIntent['cinema'])
+                ||
+                !empty($aiIntent['date'])
+            )
+        ) {
+
+            return response()->json(
+
+                $this->smartBookingService
+                    ->handle(
+                        $aiIntent
+                    )
+            );
+        }
+
+        if (
             $aiIntentName  === 'book_ticket'
         ) {
 
@@ -274,6 +299,24 @@ KHUYẾN MÃI
                     $bookingData
                 );
             }
+        }
+
+        if (
+            $aiIntentName === 'smart_booking'
+        ) {
+            Log::info('SMART_BOOKING_CONTROLLER');
+
+            $result =
+                $this->smartBookingService
+                ->handle(
+                    $aiIntent
+                );
+
+            Log::info('SMART_BOOKING_RESULT', $result);
+
+            return response()->json(
+                $result
+            );
         }
 
         if (

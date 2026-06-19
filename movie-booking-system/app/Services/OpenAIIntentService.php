@@ -38,6 +38,7 @@ Các intent hợp lệ:
 - rating_filter
 - top_movies
 - book_ticket
+- smart_booking
 - unknown
 
 THỂ LOẠI HỢP LỆ:
@@ -390,6 +391,149 @@ User: đặt 4 vé Star Wars lúc 18 giờ
   "time":"18:00"
 }
 
+
+========================
+SMART BOOKING
+========================
+
+User:
+Đặt 2 vé Star Wars tối nay giờ đẹp ghế đẹp tại Galaxy Đà Nẵng
+
+{
+  "intent":"smart_booking",
+  "movie":"Star Wars",
+  "quantity":2,
+  "city":"Đà Nẵng",
+  "cinema":"Galaxy",
+  "date":"today",
+  "time_period":"evening",
+  "seat_preference":"best"
+}
+
+User:
+Đặt 2 vé Star Wars tối nay giờ đẹp ghế đẹp tại Đà Nẵng
+
+{
+  "intent":"smart_booking",
+  "movie":"Star Wars",
+  "quantity":2,
+  "city":"Đà Nẵng",
+  "date":"today",
+  "time_period":"evening",
+  "seat_preference":"best"
+}
+
+User:
+Đặt 2 vé Star Wars tối nay giờ đẹp ghế đẹp
+
+{
+  "intent":"smart_booking",
+  "movie":"Star Wars",
+  "quantity":2,
+  "date":"today",
+  "time_period":"evening",
+  "seat_preference":"best"
+}
+
+User:
+Đặt 2 vé Star Wars tối nay
+
+{
+  "intent":"smart_booking",
+  "movie":"Star Wars",
+  "quantity":2,
+  "date":"today",
+  "time_period":"evening"
+}
+
+User:
+Đặt vé Star Wars ngày 22/6 tại Nha Trang
+
+{
+  "intent":"smart_booking",
+  "movie":"Star Wars",
+  "city":"Nha Trang",
+  "date":"22/6"
+}
+
+User:
+Đặt vé Star Wars thứ 7 này
+
+{
+  "intent":"smart_booking",
+  "movie":"Star Wars",
+  "date":"Saturday"
+}
+
+User:
+Đặt vé Star Wars sáng mai
+
+{
+  "intent":"smart_booking",
+  "movie":"Star Wars",
+  "date":"tomorrow",
+  "time_period":"morning"
+}
+
+User:
+Đặt vé Star Wars chiều mai
+
+{
+  "intent":"smart_booking",
+  "movie":"Star Wars",
+  "date":"tomorrow",
+  "time_period":"afternoon"
+}
+
+User:
+Đặt vé Star Wars tối mai
+
+{
+  "intent":"smart_booking",
+  "movie":"Star Wars",
+  "date":"tomorrow",
+  "time_period":"evening"
+}
+
+THÀNH PHỐ HỢP LỆ
+
+- Đà Nẵng
+- Hồ Chí Minh
+- Sài Gòn
+- Hà Nội
+- Nha Trang
+- Hải Phòng
+- Cần Thơ
+- Huế
+- Vũng Tàu
+- Biên Hòa
+
+RẠP HỢP LỆ
+
+- Galaxy
+- CGV
+- Lotte
+- BHD
+- Beta
+- Cinestar
+
+Nếu người dùng nói:
+
+sáng
+=> morning
+
+chiều
+=> afternoon
+
+tối
+=> evening
+
+giờ đẹp
+=> best_time = true
+
+ghế đẹp
+=> seat_preference = best
+
 '
         ],
 
@@ -428,6 +572,13 @@ User: đặt 4 vé Star Wars lúc 18 giờ
         $content,
         true
       );
+
+    Log::info('OPENAI_INTENT', $result);
+
+    Log::info(
+      'SMART_BOOKING_PARSE',
+      $result
+    );
 
     Log::info('OPENAI_RAW_RESPONSE', [
       'raw_content' => $content,
