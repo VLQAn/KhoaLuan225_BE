@@ -93,14 +93,22 @@ class ChatbotSessionService
                 $sessionId
             );
 
-        $data =
-            $session->duLieu ?? [];
+        // Parse duLieu - handle both array and JSON string
+        if (is_array($session->duLieu)) {
+            $data = $session->duLieu;
+        } else {
+            $data = json_decode(
+                $session->duLieu ?? '{}',
+                true
+            );
+        }
 
         $data[$key] =
             $value;
 
+        // Always save as JSON string
         $session->duLieu =
-            $data;
+            json_encode($data);
 
         $session->save();
     }

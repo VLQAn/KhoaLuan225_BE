@@ -76,8 +76,13 @@ class ChatbotAIController extends Controller
                 Auth::id()
             );
 
-        $data =
-            $session->duLieu ?? [];
+        // Parse duLieu JSON string đúng cách - handle both array and string
+        $data = is_array($session->duLieu) 
+            ? $session->duLieu 
+            : json_decode(
+                $session->duLieu ?? '{}',
+                true
+            );
 
         $currentStep =
             $data['booking_step']

@@ -38,9 +38,13 @@ class ChatbotBookingService
             $this->sessionService
             ->getOrCreate($userId);
 
-        $data =
-            $session->duLieu
-            ?? [];
+        // Parse duLieu JSON string đúng cách - handle both array and string
+        $data = is_array($session->duLieu)
+            ? $session->duLieu
+            : json_decode(
+                $session->duLieu ?? '{}',
+                true
+            );
 
         $step =
             $data['booking_step']
@@ -192,15 +196,29 @@ class ChatbotBookingService
                 $movie->maPhim
             );
 
-        if (
-            !empty($aiIntent['quantity'])
-        ) {
+        $quantity = $aiIntent['quantity'] ?? null;
+        
+        // Fallback: Nếu OpenAI không trả quantity, extract từ message
+        if (empty($quantity)) {
+            $quantity = $this->extractQuantityFromMessage($message);
+            Log::info('FALLBACK_QUANTITY_IN_BOOKING', [
+                'message' => $message,
+                'extracted' => $quantity
+            ]);
+        }
+
+        if (!empty($quantity)) {
+
+            Log::info('QUANTITY_SET_FROM_AI_INTENT', [
+                'quantity' => $quantity,
+                'movie' => $aiIntent['movie'] ?? null
+            ]);
 
             $this->sessionService
                 ->setData(
                     $session->maPhien,
                     'quantity',
-                    $aiIntent['quantity']
+                    $quantity
                 );
         }
 
@@ -228,6 +246,18 @@ class ChatbotBookingService
                 'booking_step',
                 'select_showtime'
             );
+
+        // Log quantity đã được lưu
+        $savedData = is_array($session->duLieu)
+            ? $session->duLieu
+            : json_decode(
+                $session->duLieu ?? '{}',
+                true
+            );
+        Log::info('BOOKING_START_SAVED_DATA', [
+            'quantity' => $savedData['quantity'] ?? null,
+            'movie' => $movie->tieuDe
+        ]);
 
         return [
 
@@ -344,6 +374,20 @@ class ChatbotBookingService
                 'select_seat'
             );
 
+        // Parse duLieu JSON để lấy quantity - handle both array and string
+        $sessionData = is_array($session->duLieu)
+            ? $session->duLieu
+            : json_decode(
+                $session->duLieu ?? '{}',
+                true
+            );
+        $quantity = $sessionData['quantity'] ?? 1;
+
+        Log::info('SHOWTIME_SELECTED_QUANTITY', [
+            'quantity' => $quantity,
+            'showtimeId' => $showtime->maXuatChieu
+        ]);
+
         return [
 
             'type' =>
@@ -353,8 +397,7 @@ class ChatbotBookingService
             $showtime->maXuatChieu,
 
             'quantity' =>
-            $session->duLieu['quantity']
-                ?? 1,
+            $quantity,
 
             'reply' =>
             '🎟️ Đã chọn suất chiếu. Vui lòng chọn ghế.'
@@ -682,8 +725,15 @@ class ChatbotBookingService
                 $seat->maGhe;
         }
 
+        // Parse duLieu to get quantity - handle both array and string
+        $sessionDataForQuantity = is_array($session->duLieu)
+            ? $session->duLieu
+            : json_decode(
+                $session->duLieu ?? '{}',
+                true
+            );
         $quantity =
-            $session->duLieu['quantity']
+            $sessionDataForQuantity['quantity']
             ?? 1;
 
         if (
@@ -754,9 +804,13 @@ class ChatbotBookingService
             ];
         }
 
-        $data =
-            $session->duLieu
-            ?? [];
+        // Parse duLieu for confirm booking - handle both array and string
+        $data = is_array($session->duLieu)
+            ? $session->duLieu
+            : json_decode(
+                $session->duLieu ?? '{}',
+                true
+            );
 
         try {
 
@@ -842,5 +896,26 @@ class ChatbotBookingService
         $showtimes
     ) {
         // xử lý sau
+    }
+
+    /**
+     * Extract số lượng vé từ message
+     * Ví dụ: "đặt 2 vé", "mua 3 vé", "tôi muốn 5 vé"
+     */
+    private function extractQuantityFromMessage(string $message): ?int
+    {
+        $lowerMessage = mb_strtolower($message);
+
+        // Pattern: số trước từ khóa vé
+        if (preg_match('/(\d+)\s*(?:cai|chiếc|tấm|ve|vé|ticket|vé phim|vé xem|vé chiếu|bộ vé)/u', $lowerMessage, $matches)) {
+            return (int) $matches[1];
+        }
+
+        // Pattern: từ khóa trước số
+        if (preg_match('/(đặt|mua|book|order|buy)?\s*(\d+)\s*(?:cai|chiếc|tấm|ve|vé|ticket)/u', $lowerMessage, $matches)) {
+            return (int) $matches[2];
+        }
+
+        return null;
     }
 }

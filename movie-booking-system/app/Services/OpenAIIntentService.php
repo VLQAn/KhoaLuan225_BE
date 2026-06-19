@@ -429,6 +429,12 @@ User: đặt 4 vé Star Wars lúc 18 giờ
         true
       );
 
+    Log::info('OPENAI_RAW_RESPONSE', [
+      'raw_content' => $content,
+      'parsed_result' => $result,
+      'json_error' => json_last_error_msg()
+    ]);
+
     if (
       json_last_error() !== JSON_ERROR_NONE
     ) {
@@ -438,6 +444,88 @@ User: đặt 4 vé Star Wars lúc 18 giờ
       ];
     }
 
+    // Fallback: nếu intent là book_ticket nhưng không có quantity,
+    // thử extract từ message bằng regex
+    Log::info('OPENAI_PARSE_RESULT', [
+      'intent' => $result['intent'] ?? null,
+      'has_quantity' => !empty($result['quantity']),
+      'quantity_value' => $result['quantity'] ?? null
+    ]);
+
+    if (
+      $result['intent'] === 'book_ticket' &&
+      empty($result['quantity'])
+    ) {
+      Log::info('FALLBACK_TRIGGERED', [
+        'message' => $message,
+        'intent' => $result['intent']
+      ]);
+      $quantity = $this->extractQuantityFromMessage($message);
+      Log::info('FALLBACK_RESULT', [
+        'message' => $message,
+        'extracted_quantity' => $quantity
+      ]);
+      if ($quantity) {
+        $result['quantity'] = $quantity;
+        Log::info('QUANTITY_EXTRACTED_FROM_FALLBACK', [
+          'message' => $message,
+          'quantity' => $quantity
+        ]);
+      }
+    }
+
+    if ($result['intent'] === 'book_ticket') {
+      Log::info('BOOKING_INTENT_DETECTED', [
+        'message' => $message,
+        'result' => $result
+      ]);
+    }
+
     return $result;
+  }
+
+  /**
+   * Extract số lượng vé từ message
+   * Ví dụ: "đặt 2 vé", "mua 3 vé", "tôi muốn 5 vé"
+   */
+  private function extractQuantityFromMessage(string $message): ?int
+  {
+    $lowerMessage = mb_strtolower($message);
+    Log::info('EXTRACT_QUANTITY_DEBUG', [
+      'original' => $message,
+      'lowercase' => $lowerMessage
+    ]);
+
+    // Pattern: số trước từ khóa vé/vé/ticket
+    // "đặt 2 vé", "mua 5 vé", "tôi muốn 3 vé"
+    if (preg_match('/(\d+)\s*(?:cai|chiếc|tấm|ve|vé|ticket|vé phim|vé xem|vé chiếu|bộ vé)/u', $lowerMessage, $matches)) {
+      Log::info('PATTERN1_MATCHED', [
+        'message' => $lowerMessage,
+        'matches' => $matches,
+        'quantity' => (int) $matches[1]
+      ]);
+      return (int) $matches[1];
+    }
+
+    Log::info('PATTERN1_NO_MATCH', [
+      'message' => $lowerMessage
+    ]);
+
+    // Pattern: từ khóa trước số
+    // "2 vé", "3 vé", "5 vé"
+    if (preg_match('/(đặt|mua|book|order|buy)?\s*(\d+)\s*(?:cai|chiếc|tấm|ve|vé|ticket)/u', $lowerMessage, $matches)) {
+      Log::info('PATTERN2_MATCHED', [
+        'message' => $lowerMessage,
+        'matches' => $matches,
+        'quantity' => (int) $matches[2]
+      ]);
+      return (int) $matches[2];
+    }
+
+    Log::info('PATTERN2_NO_MATCH', [
+      'message' => $lowerMessage
+    ]);
+
+    return null;
   }
 }
