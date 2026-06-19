@@ -2,26 +2,32 @@
 
 namespace App\Services;
 
+use Illuminate\Support\Facades\Log;
 use OpenAI\Laravel\Facades\OpenAI;
 
 class OpenAIIntentService
 {
-    public function parse(string $message)
-    {
-        $response = OpenAI::chat()->create([
+  public function parse(string $message)
+  {
+    $response = OpenAI::chat()->create([
 
-            'model' => 'gpt-4o-mini',
+      'model' => 'gpt-4o-mini',
 
-            'messages' => [
+      'messages' => [
 
-                [
-                    'role' => 'system',
+        [
+          'role' => 'system',
 
-                    'content' => '
+          'content' => '
 
 Bạn là bộ phân tích ý định chatbot rạp phim.
 
-Chỉ trả về JSON.
+Chỉ trả về JSON hợp lệ.
+
+KHÔNG được trả về:
+
+```json
+{ ... }
 
 Các intent hợp lệ:
 
@@ -385,34 +391,53 @@ User: đặt 4 vé Star Wars lúc 18 giờ
 }
 
 '
-                ],
+        ],
 
-                [
-                    'role' => 'user',
-                    'content' => $message
-                ]
-            ],
+        [
+          'role' => 'user',
+          'content' => $message
+        ]
+      ],
 
-            'temperature' => 0
-        ]);
+      'temperature' => 0
+    ]);
 
-        $result =
-            json_decode(
-                $response->choices[0]
-                    ->message
-                    ->content,
-                true
-            );
+    $content =
+      trim(
+        $response->choices[0]
+          ->message
+          ->content
+      );
 
-        if (
-            json_last_error() !== JSON_ERROR_NONE
-        ) {
+    $content =
+      preg_replace(
+        '/^```json\s*/',
+        '',
+        $content
+      );
 
-            return [
-                'intent' => 'unknown'
-            ];
-        }
+    $content =
+      preg_replace(
+        '/\s*```$/',
+        '',
+        $content
+      );
 
-        return $result;
+    $result =
+      json_decode(
+        $content,
+        true
+      );
+
+    if (
+      json_last_error() !== JSON_ERROR_NONE
+    ) {
+
+      return [
+        'intent' => 'unknown'
+      ];
     }
+
+    return $result;
+  }
 }
