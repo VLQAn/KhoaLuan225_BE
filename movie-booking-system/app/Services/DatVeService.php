@@ -81,9 +81,9 @@ class DatVeService
                 $ghe = Ghe::find($maGhe);
 
                 if (
-                    $ghe->maPhongChieu
+                    $ghe->maPhong
                     !=
-                    $xuatChieu->maPhongChieu
+                    $xuatChieu->maPhong
                 ) {
 
                     throw new Exception(
@@ -207,7 +207,7 @@ class DatVeService
             $hoaDon = HoaDon::create([
 
                 'maNguoiDung' =>
-                $data['maNguoiDung'],
+                Auth::id(),
 
                 'maKhuyenMai' =>
                 $data['maKhuyenMai'] ?? null,
