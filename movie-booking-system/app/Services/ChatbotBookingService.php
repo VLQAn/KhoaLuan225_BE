@@ -118,6 +118,13 @@ class ChatbotBookingService
                         $session
                     );
 
+            case 'checkout':
+
+                return
+                    $this->handleCheckout(
+                        $session
+                    );
+
             case 'confirm_booking':
 
                 return
@@ -769,18 +776,55 @@ class ChatbotBookingService
             ->setData(
                 $session->maPhien,
                 'booking_step',
-                'confirm_booking'
+                'checkout'
             );
 
         return [
+            'type' => 'booking_checkout',
+            'checkoutUrl' => '/checkout',
+            'movieTitle' => $showtime->phim->tieuDe ?? null,
+            'showtimeId' => $showtime->maXuatChieu,
+            'selectedSeats' => $seats,
+            'quantity' => $quantity,
+            'reply' => '✅ Chọn ghế thành công. Nhấn vào đây để xem thông tin đặt vé.'
+        ];
+    }
 
-            'type' =>
-            'booking_confirm',
+    private function handleCheckout(
+        $session
+    ) {
+        $data = is_array($session->duLieu)
+            ? $session->duLieu
+            : json_decode(
+                $session->duLieu ?? '{}',
+                true
+            );
 
-            'reply' =>
-            '✅ Đã chọn ghế '
-                . implode(', ', $seats)
-                . '. Bạn có muốn xác nhận đặt vé không?'
+        $selectedSeats = $data['selected_seats'] ?? [];
+        $quantity = $data['quantity'] ?? 1;
+        $showtimeId = $session->xuatChieuDangChon;
+        $movieTitle = null;
+
+        if ($showtimeId) {
+            $showtime = XuatChieu::with('phim')->find($showtimeId);
+            $movieTitle = $showtime?->phim?->tieuDe;
+        }
+
+        if (empty($showtimeId) || empty($selectedSeats)) {
+            return [
+                'type' => 'booking',
+                'reply' => 'Phiên đặt vé chưa hoàn tất. Vui lòng chọn suất chiếu và ghế trước.'
+            ];
+        }
+
+        return [
+            'type' => 'booking_checkout',
+            'checkoutUrl' => '/checkout',
+            'movieTitle' => $movieTitle,
+            'showtimeId' => $showtimeId,
+            'selectedSeats' => $selectedSeats,
+            'quantity' => $quantity,
+            'reply' => '✅ Chọn ghế thành công. Nhấn vào đây để xem thông tin đặt vé.'
         ];
     }
 

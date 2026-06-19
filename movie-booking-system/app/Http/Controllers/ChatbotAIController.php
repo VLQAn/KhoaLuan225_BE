@@ -99,6 +99,7 @@ class ChatbotAIController extends Controller
                 [
                     'select_showtime',
                     'select_seat',
+                    'checkout',
                     'confirm_booking',
                     'payment'
                 ]
