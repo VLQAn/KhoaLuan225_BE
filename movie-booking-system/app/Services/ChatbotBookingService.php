@@ -204,7 +204,7 @@ class ChatbotBookingService
             );
 
         $quantity = $aiIntent['quantity'] ?? null;
-        
+
         // Fallback: Nếu OpenAI không trả quantity, extract từ message
         if (empty($quantity)) {
             $quantity = $this->extractQuantityFromMessage($message);
@@ -780,13 +780,23 @@ class ChatbotBookingService
             );
 
         return [
+
             'type' => 'booking_checkout',
-            'checkoutUrl' => '/checkout',
-            'movieTitle' => $showtime->phim->tieuDe ?? null,
-            'showtimeId' => $showtime->maXuatChieu,
-            'selectedSeats' => $seats,
-            'quantity' => $quantity,
-            'reply' => '✅ Chọn ghế thành công. Nhấn vào đây để xem thông tin đặt vé.'
+
+            'showtimeId' =>
+            $showtime->maXuatChieu,
+
+            'selectedSeats' =>
+            $seats,
+
+            'quantity' =>
+            $quantity,
+
+            'checkoutUrl' =>
+            '/checkout',
+
+            'reply' =>
+            '✅ Chọn ghế thành công. Nhấn vào đây để xem thông tin đặt vé.'
         ];
     }
 

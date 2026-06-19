@@ -18,6 +18,7 @@ use App\Http\Controllers\Api\TheaterController;
 use App\Http\Controllers\Api\HistoryController;
 use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\ChatbotAIController;
+use App\Http\Controllers\ChatbotCheckoutController;
 
 /*
 |--------------------------------------------------------------------------
@@ -382,4 +383,10 @@ Route::middleware('auth:sanctum')
     ->post(
         '/chatbot/ask',
         [ChatbotAIController::class, 'ask']
+    );
+
+Route::middleware('auth:sanctum')
+    ->get(
+        '/chatbot/checkout-info',
+        [ChatbotCheckoutController::class, 'info']
     );
