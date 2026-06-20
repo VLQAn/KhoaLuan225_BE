@@ -495,6 +495,114 @@ User:
   "time_period":"evening"
 }
 
+User:
+Đặt vé Star Wars hôm nay
+
+{
+  "intent":"smart_booking",
+  "movie":"Star Wars",
+  "date":"today"
+}
+
+User:
+Đặt vé Star Wars ngày mai
+
+{
+  "intent":"smart_booking",
+  "movie":"Star Wars",
+  "date":"tomorrow"
+}
+
+User:
+Đặt vé Star Wars thứ 2
+
+{
+  "intent":"smart_booking",
+  "movie":"Star Wars",
+  "date":"Monday"
+}
+
+User:
+Đặt vé Star Wars thứ 3
+
+{
+  "intent":"smart_booking",
+  "movie":"Star Wars",
+  "date":"Tuesday"
+}
+
+User:
+Đặt vé Star Wars thứ 4
+
+{
+  "intent":"smart_booking",
+  "movie":"Star Wars",
+  "date":"Wednesday"
+}
+
+User:
+Đặt vé Star Wars thứ 5
+
+{
+  "intent":"smart_booking",
+  "movie":"Star Wars",
+  "date":"Thursday"
+}
+
+User:
+Đặt vé Star Wars thứ 6
+
+{
+  "intent":"smart_booking",
+  "movie":"Star Wars",
+  "date":"Friday"
+}
+
+User:
+Đặt vé Star Wars thứ 7
+
+{
+  "intent":"smart_booking",
+  "movie":"Star Wars",
+  "date":"Saturday"
+}
+
+User:
+Đặt vé Star Wars chủ nhật
+
+{
+  "intent":"smart_booking",
+  "movie":"Star Wars",
+  "date":"Sunday"
+}
+
+User:
+Đặt vé Star Wars cuối tuần
+
+{
+  "intent":"smart_booking",
+  "movie":"Star Wars",
+  "date":"weekend"
+}
+
+User:
+Đặt vé Star Wars ngày 22/06
+
+{
+  "intent":"smart_booking",
+  "movie":"Star Wars",
+  "date":"22/06"
+}
+
+User:
+Đặt vé Star Wars ngày 15/07
+
+{
+  "intent":"smart_booking",
+  "movie":"Star Wars",
+  "date":"15/07"
+}
+
 THÀNH PHỐ HỢP LỆ
 
 - Đà Nẵng

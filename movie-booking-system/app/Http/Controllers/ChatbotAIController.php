@@ -80,6 +80,13 @@ class ChatbotAIController extends Controller
                 Auth::id()
             );
 
+        Log::info('SESSION_LOADED', [
+            'session_id' => $session->maPhien,
+            'duLieu' => $session->duLieu,
+            'movie' => $session->phimDangChon,
+            'showtime' => $session->xuatChieuDangChon
+        ]);
+
         // Parse duLieu JSON string đúng cách - handle both array and string
         $data = is_array($session->duLieu)
             ? $session->duLieu
@@ -105,9 +112,15 @@ class ChatbotAIController extends Controller
                     'select_seat',
                     'checkout',
                     'confirm_booking',
-                    'payment'
+                    'payment',
+                    'smart_booking_ready'
                 ]
             )
+            &&
+            !$this->bookingService
+                ->isNewBookingRequest(
+                    $request->message
+                )
         ) {
 
             $this->sessionService
@@ -262,7 +275,8 @@ KHUYẾN MÃI
 
                 $this->smartBookingService
                     ->handle(
-                        $aiIntent
+                        $aiIntent,
+                        Auth::id()
                     )
             );
         }
@@ -304,15 +318,20 @@ KHUYẾN MÃI
         if (
             $aiIntentName === 'smart_booking'
         ) {
+
             Log::info('SMART_BOOKING_CONTROLLER');
 
             $result =
                 $this->smartBookingService
                 ->handle(
-                    $aiIntent
+                    $aiIntent,
+                    Auth::id()
                 );
 
-            Log::info('SMART_BOOKING_RESULT', $result);
+            Log::info(
+                'SMART_BOOKING_RESULT',
+                $result
+            );
 
             return response()->json(
                 $result

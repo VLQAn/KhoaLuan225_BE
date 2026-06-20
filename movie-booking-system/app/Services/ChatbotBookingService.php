@@ -134,6 +134,15 @@ class ChatbotBookingService
                         $userId
                     );
 
+            case 'smart_booking_ready':
+
+                return
+                    $this->handleSmartBookingConfirm(
+                        $message,
+                        $session,
+                        $userId
+                    );
+
             default:
 
                 return
@@ -927,7 +936,7 @@ class ChatbotBookingService
         }
     }
 
-    private function isNewBookingRequest(
+    public function isNewBookingRequest(
         string $message
     ): bool {
         $message =
@@ -942,6 +951,42 @@ class ChatbotBookingService
             preg_match(
                 '/dat.*ve/i',
                 $message
+            );
+    }
+
+    private function handleSmartBookingConfirm(
+        string $message,
+        $session,
+        ?int $userId
+    ) {
+        if (
+            !$this->isConfirmMessage(
+                $message
+            )
+        ) {
+
+            return [
+
+                'type' =>
+                'booking',
+
+                'reply' =>
+                'Vui lòng nhập "xác nhận" để tiếp tục.'
+            ];
+        }
+
+        $this->sessionService
+            ->setData(
+                $session->maPhien,
+                'booking_step',
+                'confirm_booking'
+            );
+
+        return
+            $this->handleConfirmBooking(
+                $message,
+                $session,
+                $userId
             );
     }
 

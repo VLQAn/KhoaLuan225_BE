@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\PhienTroChuyen;
+use Illuminate\Support\Facades\Log;
 use App\Models\LichSuTroChuyen;
 
 class ChatbotSessionService
@@ -111,6 +112,13 @@ class ChatbotSessionService
             json_encode($data);
 
         $session->save();
+
+        Log::info('SET_DATA', [
+            'session_id' => $sessionId,
+            'key' => $key,
+            'value' => $value,
+            'duLieu' => $session->duLieu
+        ]);
     }
 
     public function getData(

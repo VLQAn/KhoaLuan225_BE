@@ -8,11 +8,27 @@ use App\Models\XuatChieu;
 use App\Models\Ve;
 use App\Models\Ghe;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
+use App\Services\ChatbotSessionService;
 
 class SmartBookingService
 {
-    public function handle(array $aiIntent)
-    {
+    protected $sessionService;
+
+    public function __construct(
+        ChatbotSessionService $sessionService
+    ) {
+        $this->sessionService = $sessionService;
+    }
+
+    public function handle(
+        array $aiIntent,
+        ?int $userId = null
+    ) {
+        $session =
+            $this->sessionService
+            ->getOrCreate($userId);
+
         $movie =
             $this->findMovie(
                 $aiIntent['movie'] ?? null
@@ -96,7 +112,8 @@ class SmartBookingService
             $this->findBestShowtime(
                 $movie->maPhim,
                 $rap->maRap,
-                $aiIntent['date'] ?? null
+                $aiIntent['date'] ?? null,
+                $aiIntent['time_period'] ?? null
             );
 
         if (!$showtime) {
@@ -119,9 +136,82 @@ class SmartBookingService
                 $quantity
             );
 
+        $this->sessionService
+            ->setMovie(
+                $session->maPhien,
+                $movie->maPhim
+            );
+
+        $this->sessionService
+            ->setShowtime(
+                $session->maPhien,
+                $showtime->maXuatChieu
+            );
+
+        $this->sessionService
+            ->setData(
+                $session->maPhien,
+                'selected_seat_ids',
+                $seats->pluck('maGhe')->toArray()
+            );
+
+        $this->sessionService
+            ->setData(
+                $session->maPhien,
+                'selected_seats',
+                $seats->map(
+                    fn($s)
+                    =>
+                    $s->hangGhe . $s->soGhe
+                )->toArray()
+            );
+
+        $this->sessionService
+            ->setData(
+                $session->maPhien,
+                'quantity',
+                $quantity
+            );
+
+        $this->sessionService
+            ->setData(
+                $session->maPhien,
+                'booking_step',
+                'smart_booking_ready'
+            );
+        $this->sessionService
+            ->setData(
+                $session->maPhien,
+                'movie_id',
+                $movie->maPhim
+            );
+
+        $this->sessionService
+            ->setData(
+                $session->maPhien,
+                'showtime_id',
+                $showtime->maXuatChieu
+            );
+
+        $this->sessionService
+            ->setData(
+                $session->maPhien,
+                'cinema_id',
+                $rap->maRap
+            );
+
+        $session->refresh();
+
+        Log::info('SMART_BOOKING_SESSION_AFTER_SAVE', [
+            'session_id' => $session->maPhien,
+            'movie' => $session->phimDangChon,
+            'showtime' => $session->xuatChieuDangChon,
+            'data' => $session->duLieu
+        ]);
+
         return [
 
-            'type' => 'smart_booking',
+            'type' => 'smart_booking_checkout',
 
             'movie' => $movie,
 
@@ -129,10 +219,14 @@ class SmartBookingService
 
             'showtime' => $showtime,
 
+            'quantity' => $quantity,
+
             'seats' => $seats,
 
+            'checkoutUrl' => '/checkout',
+
             'reply' =>
-            '🎟️ Tôi đã tìm được suất chiếu và ghế đẹp nhất cho bạn.'
+            '🎟️ Tôi đã tìm được suất chiếu phù hợp. Nhấn để xem thông tin đặt vé.'
         ];
     }
 
@@ -183,7 +277,8 @@ class SmartBookingService
     private function findBestShowtime(
         int $movieId,
         int $rapId,
-        ?string $date
+        ?string $date,
+        ?string $timePeriod = null
     ) {
         $showtimes =
             XuatChieu::with(
@@ -201,25 +296,76 @@ class SmartBookingService
 
         $showtimes =
             $showtimes->filter(
-                function ($showtime)
-                use ($rapId) {
-
-                    return
-                        $showtime
-                        ->phongChieu
-                        ->maRap
-                        ==
-                        $rapId;
-                }
+                fn($s)
+                =>
+                $s->phongChieu->maRap == $rapId
             );
 
-        if ($date === 'toi_nay') {
+        /*
+    |--------------------------------------------------------------------------
+    | Filter theo ngày
+    |--------------------------------------------------------------------------
+    */
+        if ($date) {
+
+            $targetDate =
+                $this->resolveDate(
+                    $date
+                );
+
+            if ($targetDate) {
+
+                $showtimes =
+                    $showtimes->filter(
+                        function ($s)
+                        use ($targetDate) {
+
+                            return Carbon::parse(
+                                $s->thoiGianBatDau
+                            )->isSameDay(
+                                $targetDate
+                            );
+                        }
+                    );
+            }
+        }
+
+        /*
+    |--------------------------------------------------------------------------
+    | Filter theo buổi
+    |--------------------------------------------------------------------------
+    */
+        if ($timePeriod) {
 
             $showtimes =
                 $showtimes->filter(
-                    fn($s)
-                    =>
-                    $this->isTonight($s)
+                    function ($s)
+                    use ($timePeriod) {
+
+                        $hour =
+                            Carbon::parse(
+                                $s->thoiGianBatDau
+                            )->hour;
+
+                        return match ($timePeriod) {
+
+                            'morning'
+                            =>
+                            $hour >= 6
+                                && $hour < 12,
+
+                            'afternoon'
+                            =>
+                            $hour >= 12
+                                && $hour < 18,
+
+                            'evening'
+                            =>
+                            $hour >= 18,
+
+                            default => true
+                        };
+                    }
                 );
         }
 
@@ -238,6 +384,79 @@ class SmartBookingService
                 }
             )
             ->first();
+    }
+
+    private function resolveDate(
+        ?string $date
+    ) {
+        if (!$date) {
+            return null;
+        }
+
+        return match ($date) {
+
+            'today'
+            => Carbon::today(),
+
+            'tomorrow'
+            => Carbon::tomorrow(),
+
+            'Monday'
+            => Carbon::parse('next monday'),
+
+            'Tuesday'
+            => Carbon::parse('next tuesday'),
+
+            'Wednesday'
+            => Carbon::parse('next wednesday'),
+
+            'Thursday'
+            => Carbon::parse('next thursday'),
+
+            'Friday'
+            => Carbon::parse('next friday'),
+
+            'Saturday'
+            => Carbon::parse('next saturday'),
+
+            'Sunday'
+            => Carbon::parse('next sunday'),
+
+            'weekend'
+            => Carbon::parse('next saturday'),
+
+            default
+            => $this->parseCustomDate(
+                $date
+            )
+        };
+    }
+
+    private function parseCustomDate(
+        string $date
+    ) {
+        if (
+            preg_match(
+                '/(\d{1,2})\/(\d{1,2})/',
+                $date,
+                $matches
+            )
+        ) {
+
+            $day =
+                (int)$matches[1];
+
+            $month =
+                (int)$matches[2];
+
+            return Carbon::create(
+                now()->year,
+                $month,
+                $day
+            );
+        }
+
+        return null;
     }
 
     private function isTonight(
