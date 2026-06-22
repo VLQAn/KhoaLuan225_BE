@@ -305,7 +305,8 @@ class XuatChieuService
 
     public function getShowtimesByMovie(
         int $movieId,
-        ?string $date = null
+        ?string $date = null,
+        ?string $cinema = null
     ) {
         $showtimes =
             XuatChieu::with([
@@ -369,6 +370,28 @@ class XuatChieuService
                         );
                 }
             }
+        }
+
+        if ($cinema) {
+
+            $showtimes =
+                $showtimes->filter(
+                    function ($showtime) use ($cinema) {
+
+                        $tenRap =
+                            strtolower(
+                                $showtime
+                                    ->phongChieu
+                                    ->rapChieu
+                                    ->tenRap
+                            );
+
+                        return str_contains(
+                            $tenRap,
+                            strtolower($cinema)
+                        );
+                    }
+                );
         }
 
         return $showtimes->values();

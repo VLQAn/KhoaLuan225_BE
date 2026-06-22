@@ -523,7 +523,8 @@ KHUYẾN MÃI
                 $this->xuatChieuService
                 ->getShowtimesByMovie(
                     $movie->maPhim,
-                    $aiIntent['date'] ?? null
+                    $aiIntent['date'] ?? null,
+                    $aiIntent['cinema'] ?? null
                 );
 
             return response()->json([
@@ -534,7 +535,9 @@ KHUYẾN MÃI
 
                 'date' => $aiIntent['date'] ?? null,
 
-                'showtimes' => $showtimes
+                'showtimes' => $showtimes,
+
+                'cinema' => $aiIntent['cinema'] ?? null
             ]);
         }
 

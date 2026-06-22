@@ -642,6 +642,30 @@ User: suất chiếu Star Wars ngày mai
   "date":"tomorrow"
 }
 
+User: Bạch Xà ở Galaxy
+
+{
+  "intent":"showtime_query",
+  "movie":"Bạch Xà",
+  "cinema":"Galaxy"
+}
+
+User: Your Name ở CGV
+
+{
+  "intent":"showtime_query",
+  "movie":"Your Name",
+  "cinema":"CGV"
+}
+
+User: lịch chiếu Bạch Xà tại Galaxy Đà Nẵng
+
+{
+  "intent":"showtime_query",
+  "movie":"Bạch Xà",
+  "cinema":"Galaxy"
+}
+
 QUAN TRỌNG:
 
 Nếu người dùng KHÔNG nhắc đến:
