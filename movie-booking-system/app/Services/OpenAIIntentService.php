@@ -32,6 +32,7 @@ KHÔNG được trả về:
 Các intent hợp lệ:
 
 - movie_info
+- showtime_query
 - recommendation
 - comparison
 - genre_filter
@@ -391,6 +392,363 @@ User: đặt 4 vé Star Wars lúc 18 giờ
   "time":"18:00"
 }
 
+========================
+SHOWTIME QUERY
+========================
+
+Nếu người dùng hỏi lịch chiếu phim thì trả về:
+
+{
+   "intent":"showtime_query",
+   "movie":"Tên phim",
+   "date":"..."
+}
+
+date có thể là:
+
+today
+tomorrow
+
+Monday
+Tuesday
+Wednesday
+Thursday
+Friday
+Saturday
+Sunday
+
+weekend
+next_weekend
+
+this_week
+next_week
+
+this_month
+next_month
+
+end_of_month
+start_of_month
+
+holiday_2_9
+christmas
+new_year
+tet
+
+User: Your Name tuần này
+
+{
+  "intent":"showtime_query",
+  "movie":"Your Name",
+  "date":"this_week"
+}
+
+User: lịch chiếu Bạch Xà tuần này
+
+{
+  "intent":"showtime_query",
+  "movie":"Bạch Xà",
+  "date":"this_week"
+}
+
+User: Your Name tuần sau
+
+{
+  "intent":"showtime_query",
+  "movie":"Your Name",
+  "date":"next_week"
+}
+
+User: Your Name cuối tuần này
+
+{
+  "intent":"showtime_query",
+  "movie":"Your Name",
+  "date":"weekend"
+}
+
+User: Your Name cuối tháng
+
+{
+  "intent":"showtime_query",
+  "movie":"Your Name",
+  "date":"end_of_month"
+}
+
+User: Bạch Xà cuối tháng này
+
+{
+  "intent":"showtime_query",
+  "movie":"Bạch Xà",
+  "date":"end_of_month"
+}
+
+User: Your Name đầu tháng
+
+{
+  "intent":"showtime_query",
+  "movie":"Your Name",
+  "date":"start_of_month"
+}
+
+User: Your Name lễ 2/9
+
+{
+  "intent":"showtime_query",
+  "movie":"Your Name",
+  "date":"holiday_2_9"
+}
+
+User: Bạch Xà quốc khánh
+
+{
+  "intent":"showtime_query",
+  "movie":"Bạch Xà",
+  "date":"holiday_2_9"
+}
+
+User: Your Name tết
+
+{
+  "intent":"showtime_query",
+  "movie":"Your Name",
+  "date":"tet"
+}
+
+User: Bạch Xà dịp tết
+
+{
+  "intent":"showtime_query",
+  "movie":"Bạch Xà",
+  "date":"tet"
+}
+
+User: Your Name giáng sinh
+
+{
+  "intent":"showtime_query",
+  "movie":"Your Name",
+  "date":"christmas"
+}
+
+User: Your Name hôm nay
+
+{
+"intent":"showtime_query",
+"movie":"Your Name",
+"date":"today"
+}
+
+User: Your Name ngày mai
+
+{
+"intent":"showtime_query",
+"movie":"Your Name",
+"date":"tomorrow"
+}
+
+User: Your Name cuối tuần
+
+{
+"intent":"showtime_query",
+"movie":"Your Name",
+"date":"weekend"
+}
+
+User: Your Name tuần sau
+
+{
+"intent":"showtime_query",
+"movie":"Your Name",
+"date":"next_week"
+}
+
+User: Your Name lễ 2/9
+
+{
+"intent":"showtime_query",
+"movie":"Your Name",
+"date":"holiday_2_9"
+}
+
+User: Star Wars hôm nay
+
+{
+  "intent":"showtime_query",
+  "movie":"Star Wars",
+  "date":"today"
+}
+
+User: Star Wars ngày mai
+
+{
+  "intent":"showtime_query",
+  "movie":"Star Wars",
+  "date":"tomorrow"
+}
+
+User: Star Wars thứ 2
+
+{
+  "intent":"showtime_query",
+  "movie":"Star Wars",
+  "date":"Monday"
+}
+
+User: Star Wars thứ 7
+
+{
+  "intent":"showtime_query",
+  "movie":"Star Wars",
+  "date":"Saturday"
+}
+
+User: Star Wars chủ nhật
+
+{
+  "intent":"showtime_query",
+  "movie":"Star Wars",
+  "date":"Sunday"
+}
+
+User: Star Wars cuối tuần
+
+{
+  "intent":"showtime_query",
+  "movie":"Star Wars",
+  "date":"weekend"
+}
+
+User: Star Wars 22/06
+
+{
+  "intent":"showtime_query",
+  "movie":"Star Wars",
+  "date":"22/06"
+}
+
+User: lịch chiếu Star Wars hôm nay
+
+{
+  "intent":"showtime_query",
+  "movie":"Star Wars",
+  "date":"today"
+}
+
+User: suất chiếu Star Wars ngày mai
+
+{
+  "intent":"showtime_query",
+  "movie":"Star Wars",
+  "date":"tomorrow"
+}
+
+QUAN TRỌNG:
+
+Nếu người dùng KHÔNG nhắc đến:
+
+- đặt vé
+- mua vé
+- book vé
+
+thì KHÔNG được trả về:
+
+book_ticket
+smart_booking
+
+Nếu người dùng chỉ hỏi:
+
+- lịch chiếu
+- suất chiếu
+- hôm nay
+- ngày mai
+- thứ 2
+- thứ 7
+- chủ nhật
+- cuối tuần
+- 22/06
+
+=> intent = showtime_query
+
+Nếu người dùng nhập:
+
+"your name hôm nay"
+"bạch xà hôm nay"
+"toy story hôm nay"
+"thanh sắc hôm nay"
+"your name ngày mai"
+
+=> luôn trả về:
+
+{
+  "intent":"showtime_query",
+  "movie":"<tên phim>",
+  "date":"today|tomorrow"
+}
+
+QUY TẮC NHẬN DIỆN NGÀY:
+
+hôm nay
+=> today
+
+ngày mai
+=> tomorrow
+
+thứ 2
+=> Monday
+
+thứ 3
+=> Tuesday
+
+thứ 4
+=> Wednesday
+
+thứ 5
+=> Thursday
+
+thứ 6
+=> Friday
+
+thứ 7
+=> Saturday
+
+chủ nhật
+=> Sunday
+
+tuần này
+=> this_week
+
+tuần sau
+=> next_week
+
+cuối tuần
+=> weekend
+
+cuối tuần sau
+=> next_weekend
+
+tháng này
+=> this_month
+
+tháng sau
+=> next_month
+
+đầu tháng
+=> start_of_month
+
+cuối tháng
+=> end_of_month
+
+lễ 2/9
+=> holiday_2_9
+
+quốc khánh
+=> holiday_2_9
+
+giáng sinh
+=> christmas
+
+tết
+=> tet
 
 ========================
 SMART BOOKING

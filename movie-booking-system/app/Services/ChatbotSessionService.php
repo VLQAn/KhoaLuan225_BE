@@ -147,14 +147,13 @@ class ChatbotSessionService
             $sessionId
         )->update([
 
-            'phimDangChon' =>
-            null,
+            'phimDangChon' => null,
 
-            'xuatChieuDangChon' =>
-            null,
+            'xuatChieuDangChon' => null,
 
-            'duLieu' =>
-            null
+            'duLieu' => null,
+
+            'trangThai' => 'completed'
         ]);
     }
 }

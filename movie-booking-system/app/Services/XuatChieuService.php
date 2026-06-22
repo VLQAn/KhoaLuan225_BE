@@ -302,4 +302,252 @@ class XuatChieuService
             })
         ];
     }
+
+    public function getShowtimesByMovie(
+        int $movieId,
+        ?string $date = null
+    ) {
+        $showtimes =
+            XuatChieu::with([
+                'phongChieu.rapChieu',
+                'phim'
+            ])
+            ->where(
+                'maPhim',
+                $movieId
+            )
+            ->where(
+                'trangThai',
+                'Sap_Chieu'
+            )
+            ->get();
+
+        if ($date) {
+
+            $range =
+                $this->resolveDateRange(
+                    $date
+                );
+
+            if ($range) {
+
+                [$start, $end] = $range;
+
+                $showtimes =
+                    $showtimes->filter(
+                        function ($showtime)
+                        use ($start, $end) {
+
+                            return Carbon::parse(
+                                $showtime->thoiGianBatDau
+                            )->between(
+                                $start,
+                                $end
+                            );
+                        }
+                    );
+            } else {
+
+                $targetDate =
+                    $this->resolveDate(
+                        $date
+                    );
+
+                if ($targetDate) {
+
+                    $showtimes =
+                        $showtimes->filter(
+                            function ($showtime)
+                            use ($targetDate) {
+
+                                return Carbon::parse(
+                                    $showtime->thoiGianBatDau
+                                )->isSameDay(
+                                    $targetDate
+                                );
+                            }
+                        );
+                }
+            }
+        }
+
+        return $showtimes->values();
+    }
+
+    private function resolveDateRange(
+        string $date
+    ) {
+        return match ($date) {
+
+            'today' => [
+                Carbon::today()->startOfDay(),
+                Carbon::today()->endOfDay()
+            ],
+
+            'tomorrow' => [
+                Carbon::tomorrow()->startOfDay(),
+                Carbon::tomorrow()->endOfDay()
+            ],
+
+            'this_week' => [
+                Carbon::now()->startOfWeek(),
+                Carbon::now()->endOfWeek()
+            ],
+
+            'next_week' => [
+                Carbon::now()
+                    ->addWeek()
+                    ->startOfWeek(),
+
+                Carbon::now()
+                    ->addWeek()
+                    ->endOfWeek()
+            ],
+
+            'weekend' => [
+                Carbon::now()->next(Carbon::SATURDAY)
+                    ->startOfDay(),
+
+                Carbon::now()->next(Carbon::SUNDAY)
+                    ->endOfDay()
+            ],
+
+            'next_weekend' => [
+                Carbon::now()
+                    ->addWeek()
+                    ->next(Carbon::SATURDAY)
+                    ->startOfDay(),
+
+                Carbon::now()
+                    ->addWeek()
+                    ->next(Carbon::SUNDAY)
+                    ->endOfDay()
+            ],
+
+            'this_month' => [
+                Carbon::now()->startOfMonth(),
+                Carbon::now()->endOfMonth()
+            ],
+
+            'next_month' => [
+                Carbon::now()
+                    ->addMonth()
+                    ->startOfMonth(),
+
+                Carbon::now()
+                    ->addMonth()
+                    ->endOfMonth()
+            ],
+
+            'end_of_month' => [
+                Carbon::now()
+                    ->copy()
+                    ->endOfMonth()
+                    ->subDays(6),
+
+                Carbon::now()
+                    ->copy()
+                    ->endOfMonth()
+            ],
+
+            'start_of_month' => [
+                Carbon::now()
+                    ->copy()
+                    ->startOfMonth(),
+
+                Carbon::now()
+                    ->copy()
+                    ->startOfMonth()
+                    ->addDays(6)
+            ],
+
+            'holiday_2_9' => [
+                Carbon::create(
+                    now()->year,
+                    9,
+                    2
+                )->startOfDay(),
+
+                Carbon::create(
+                    now()->year,
+                    9,
+                    2
+                )->endOfDay()
+            ],
+
+            'christmas' => [
+                Carbon::create(
+                    now()->year,
+                    12,
+                    25
+                )->startOfDay(),
+
+                Carbon::create(
+                    now()->year,
+                    12,
+                    25
+                )->endOfDay()
+            ],
+
+            default => null
+        };
+    }
+
+    public function resolveDate(
+        ?string $date
+    ) {
+        if (!$date) {
+            return null;
+        }
+
+        return match ($date) {
+
+            'Monday'
+            => Carbon::parse('next monday'),
+
+            'Tuesday'
+            => Carbon::parse('next tuesday'),
+
+            'Wednesday'
+            => Carbon::parse('next wednesday'),
+
+            'Thursday'
+            => Carbon::parse('next thursday'),
+
+            'Friday'
+            => Carbon::parse('next friday'),
+
+            'Saturday'
+            => Carbon::parse('next saturday'),
+
+            'Sunday'
+            => Carbon::parse('next sunday'),
+
+            default
+            => $this->parseCustomDate(
+                $date
+            )
+        };
+    }
+
+    private function parseCustomDate(
+        string $date
+    ) {
+        if (
+            preg_match(
+                '/(\d{1,2})[\/\-](\d{1,2})/',
+                $date,
+                $matches
+            )
+        ) {
+
+            return Carbon::create(
+                now()->year,
+                (int)$matches[2],
+                (int)$matches[1]
+            );
+        }
+
+        return null;
+    }
 }

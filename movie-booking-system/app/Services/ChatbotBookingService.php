@@ -66,6 +66,8 @@ class ChatbotBookingService
                     $session->maPhien
                 );
 
+            $session->refresh();
+
             Log::info('BOOKING_SESSION_RESET');
 
             return [
@@ -899,10 +901,8 @@ class ChatbotBookingService
                 );
 
             $this->sessionService
-                ->setData(
-                    $session->maPhien,
-                    'booking_step',
-                    'payment'
+                ->clearSession(
+                    $session->maPhien
                 );
 
             return [

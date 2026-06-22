@@ -10,15 +10,19 @@ use App\Models\Ghe;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 use App\Services\ChatbotSessionService;
+use App\Services\XuatChieuService;
 
 class SmartBookingService
 {
     protected $sessionService;
+    protected $xuatChieuService;
 
     public function __construct(
-        ChatbotSessionService $sessionService
+        ChatbotSessionService $sessionService,
+        XuatChieuService $xuatChieuService
     ) {
         $this->sessionService = $sessionService;
+        $this->xuatChieuService = $xuatChieuService;
     }
 
     public function handle(
@@ -309,9 +313,8 @@ class SmartBookingService
         if ($date) {
 
             $targetDate =
-                $this->resolveDate(
-                    $date
-                );
+                $this->xuatChieuService
+                ->resolveDate($date);
 
             if ($targetDate) {
 

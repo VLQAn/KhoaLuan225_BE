@@ -13,6 +13,8 @@ use App\Services\ChatbotSessionService;
 use App\Services\ChatbotMovieService;
 use App\Services\OpenAIIntentService;
 use App\Services\SmartBookingService;
+use App\Models\XuatChieu;
+use App\Services\XuatChieuService;
 
 class ChatbotAIController extends Controller
 {
@@ -23,6 +25,7 @@ class ChatbotAIController extends Controller
     protected $movieService;
     protected $openAIIntentService;
     protected $smartBookingService;
+    protected $xuatChieuService;
 
     public function __construct(
         ChatbotContextService $contextService,
@@ -31,7 +34,8 @@ class ChatbotAIController extends Controller
         ChatbotSessionService $sessionService,
         ChatbotMovieService $movieService,
         OpenAIIntentService $openAIIntentService,
-        SmartBookingService $smartBookingService
+        SmartBookingService $smartBookingService,
+        XuatChieuService $xuatChieuService
     ) {
         $this->contextService = $contextService;
         $this->intentService = $intentService;
@@ -40,6 +44,7 @@ class ChatbotAIController extends Controller
         $this->movieService = $movieService;
         $this->openAIIntentService = $openAIIntentService;
         $this->smartBookingService = $smartBookingService;
+        $this->xuatChieuService = $xuatChieuService;
     }
 
     private function normalizeGenre(
@@ -98,6 +103,30 @@ class ChatbotAIController extends Controller
         $currentStep =
             $data['booking_step']
             ?? null;
+
+        Log::info('BOOKING_GATE_CHECK', [
+            'currentStep' => $currentStep,
+            'message' => $request->message,
+            'isNewBookingRequest' =>
+            $this->bookingService
+                ->isNewBookingRequest(
+                    $request->message
+                )
+        ]);
+
+        if ($currentStep === 'payment') {
+
+            Log::info('BOOKING_COMPLETED_CLEAR_SESSION');
+
+            $this->sessionService
+                ->clearSession(
+                    $session->maPhien
+                );
+
+            $session->refresh();
+
+            $currentStep = null;
+        }
 
         Log::info('CURRENT_STEP', [
             'step' => $currentStep,
@@ -470,6 +499,42 @@ KHUYẾN MÃI
                     ->getRecommendedMovies(
                         $aiIntent['movie']
                     )
+            ]);
+        }
+
+        if (
+            $aiIntentName ===
+            'showtime_query'
+        ) {
+            $movie =
+                $this->movieService
+                ->getMovieByName(
+                    $aiIntent['movie']
+                );
+
+            if (!$movie) {
+
+                return response()->json([
+                    'type' => 'movie_not_found'
+                ]);
+            }
+
+            $showtimes =
+                $this->xuatChieuService
+                ->getShowtimesByMovie(
+                    $movie->maPhim,
+                    $aiIntent['date'] ?? null
+                );
+
+            return response()->json([
+
+                'type' => 'showtime_query',
+
+                'movie' => $movie,
+
+                'date' => $aiIntent['date'] ?? null,
+
+                'showtimes' => $showtimes
             ]);
         }
 
