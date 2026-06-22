@@ -275,6 +275,41 @@ User: gợi ý phim giống Star Wars
   "movie":"Star Wars"
 }
 
+QUY TẮC SỐ LƯỢNG (limit) CHO top_movies:
+
+- Có số cụ thể (top 10 phim, 3 phim hay nhất...) => limit = số đó.
+- Câu hỏi SỐ ÍT, không có "top"/"những"/"các" và không có số
+  (ví dụ: "phim hay nhất", "phim được đánh giá cao nhất",
+  "bộ phim đỉnh nhất hiện giờ", "phim nào hay nhất")
+  => limit = 1 (chỉ 1 phim duy nhất).
+- Câu hỏi SỐ NHIỀU không có số cụ thể
+  (ví dụ: "top phim hay nhất", "những phim nổi bật nhất", "các phim hay nhất")
+  => KHÔNG trả limit (hệ thống tự lấy mặc định).
+
+User: phim hay nhất
+{
+  "intent":"top_movies",
+  "limit":1
+}
+
+User: phim được đánh giá cao nhất
+{
+  "intent":"top_movies",
+  "limit":1
+}
+
+User: phim nào hay nhất hiện giờ
+{
+  "intent":"top_movies",
+  "limit":1
+}
+
+User: bộ phim đỉnh nhất rạp mình đang có là phim nào
+{
+  "intent":"top_movies",
+  "limit":1
+}
+
 User: top 5 phim
 
 {
@@ -285,12 +320,14 @@ User: top phim hay nhất
 
 {
   "intent":"top_movies"
+  "limit":1
 }
 
 User: phim được đánh giá cao nhất
 
 {
   "intent":"top_movies"
+  "limit":1
 }
 
 User: top 10 phim
@@ -311,6 +348,21 @@ User: những phim nổi bật nhất
 
 {
   "intent":"top_movies"
+  "limit":3
+}
+
+User: những phim đánh giá cao
+
+{
+  "intent":"top_movies"
+  "limit":6
+}
+
+User: phim có đánh giá cao
+
+{
+  "intent":"top_movies"
+  "limit":6
 }
 
 User: so sánh Star Wars và Avengers

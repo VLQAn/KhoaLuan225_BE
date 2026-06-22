@@ -400,62 +400,16 @@ class ChatbotMovieService
     public function getTopMovies(
         int $limit = 5
     ) {
-        return Phim::orderByDesc(
-            'danhGia'
+        return Phim::where(
+            'trangThai',
+            'dang_chieu'
         )
+            ->orderByDesc(
+                'danhGia'
+            )
             ->limit(
                 $limit
             )
             ->get();
     }
-
-    // public function detectMovieInfoIntent(
-    //     string $message
-    // ) {
-    //     $message =
-    //         TextHelper::normalize(
-    //             $message
-    //         );
-
-    //     if (
-    //         str_contains(
-    //             $message,
-    //             'noi dung'
-    //         )
-    //     ) {
-    //         return 'summary';
-    //     }
-
-    //     if (
-    //         str_contains(
-    //             $message,
-    //             'dao dien'
-    //         )
-    //     ) {
-    //         return 'director';
-    //     }
-
-    //     if (
-    //         str_contains(
-    //             $message,
-    //             'dien vien'
-    //         )
-    //     ) {
-    //         return 'actor';
-    //     }
-
-    //     return null;
-    // }
-
-    /*
-    =========================
-    ĐẶT VÉ
-    =========================
-    */
-
-    /*
-    =========================
-    OPENAI FALLBACK
-    =========================
-    */
 }

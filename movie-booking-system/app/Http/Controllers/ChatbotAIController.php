@@ -463,9 +463,8 @@ KHUYẾN MÃI
             'top_movies'
         ) {
 
-            $limit =
-                $aiIntent['limit']
-                ?? 5;
+            $limit = $aiIntent['limit'] ?? 5;
+            $limit = max(1, min((int) $limit, 20));
 
             return response()->json([
 
