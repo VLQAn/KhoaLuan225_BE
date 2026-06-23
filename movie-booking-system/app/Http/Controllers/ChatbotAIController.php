@@ -414,19 +414,22 @@ KHUYẾN MÃI
             'rating_filter'
         ) {
 
+            $minRating =
+                (float)
+                ($aiIntent['min_rating'] ?? 8);
+
             return response()->json([
 
                 'type' =>
                 'rating_filter',
 
-                'rating' =>
-                $aiIntent['rating'],
+                'min_rating' =>
+                $minRating,
 
                 'movies' =>
                 $this->movieService
                     ->getMoviesByRating(
-                        (float)
-                        $aiIntent['rating']
+                        $minRating
                     )
             ]);
         }
@@ -458,27 +461,24 @@ KHUYẾN MÃI
             ]);
         }
 
-        if (
-            $aiIntentName ===
-            'top_movies'
-        ) {
+        if ($aiIntentName === 'top_movies') {
 
             $limit = $aiIntent['limit'] ?? 5;
             $limit = max(1, min((int) $limit, 20));
 
+            $genre = !empty($aiIntent['genre'])
+                ? $this->normalizeGenre($aiIntent['genre'])
+                : null;
+
+            $movies = $genre
+                ? $this->movieService->getTopMoviesByGenre($genre, $limit)
+                : $this->movieService->getTopMovies($limit);
+
             return response()->json([
-
-                'type' =>
-                'top_movies',
-
-                'limit' =>
-                $limit,
-
-                'movies' =>
-                $this->movieService
-                    ->getTopMovies(
-                        (int)$limit
-                    )
+                'type' => 'top_movies',
+                'limit' => $limit,
+                'genre' => $genre,
+                'movies' => $movies
             ]);
         }
 

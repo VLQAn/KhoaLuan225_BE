@@ -345,13 +345,17 @@ class ChatbotMovieService
     }
 
     public function getMoviesByRating(
-        float $rating
+        float $minRating
     ) {
         return Phim::where(
-            'danhGia',
-            '>=',
-            $rating
+            'trangThai',
+            'dang_chieu'
         )
+            ->where(
+                'danhGia',
+                '>=',
+                $minRating
+            )
             ->orderByDesc(
                 'danhGia'
             )
@@ -410,6 +414,20 @@ class ChatbotMovieService
             ->limit(
                 $limit
             )
+            ->get();
+    }
+
+    public function getTopMoviesByGenre(
+        string $genre,
+        int $limit = 5
+    ) {
+        return Phim::with('theLoai')
+            ->where('trangThai', 'dang_chieu')
+            ->whereHas('theLoai', function ($query) use ($genre) {
+                $query->where('tenTheLoai', $genre);
+            })
+            ->orderByDesc('danhGia')
+            ->limit($limit)
             ->get();
     }
 }

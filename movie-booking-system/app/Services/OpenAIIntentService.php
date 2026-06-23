@@ -128,60 +128,55 @@ User: diễn viên trong Star Wars
   "infoType":"actor"
 }
 
+========================
+RATING FILTER
+========================
+
+CHỈ sử dụng rating_filter khi người dùng có đề cập
+đến một mức điểm cụ thể.
+
+Ví dụ:
+
 User: phim trên 8 điểm
 
 {
   "intent":"rating_filter",
-  "rating":8
+  "min_rating":8
+}
+
+User: phim rating trên 9
+
+{
+  "intent":"rating_filter",
+  "min_rating":9
+}
+
+User: phim có đánh giá trên 9 điểm
+
+{
+  "intent":"rating_filter",
+  "min_rating":9
 }
 
 User: phim từ 8 điểm trở lên
 
 {
   "intent":"rating_filter",
-  "rating":8
-}
-
-User: phim trên 9 điểm
-
-{
-  "intent":"rating_filter",
-  "rating":9
-}
-
-User: phim đánh giá cao
-
-{
-  "intent":"rating_filter",
-  "rating":8.5
+  "min_rating":8
 }
 
 User: phim hay trên 8 điểm
 
 {
   "intent":"rating_filter",
-  "rating":8
+  "min_rating":8
 }
 
-User: phim được chấm điểm cao
+User: phim trên 8.5 điểm
 
 {
   "intent":"rating_filter",
-  "rating":8.5
-}
-
-User: phim có rating cao
-
-{
-  "intent":"rating_filter",
-  "rating":8.5
-}
-
-User: phim rating cao
-
-{
-  "intent":"rating_filter",
-  "rating":8.5
+  "min_rating":8.5
 }
 
 User: phim viễn tưởng
@@ -364,6 +359,82 @@ User: phim có đánh giá cao
   "intent":"top_movies"
   "limit":6
 }
+
+Nếu câu hỏi top_movies có kèm thể loại,
+thêm field "genre" (áp dụng đúng quy tắc chuẩn hóa thể loại đã nêu ở trên):
+
+User: top 3 phim kinh dị hay nhất
+{
+  "intent":"top_movies",
+  "limit":3,
+  "genre":"Kinh dị"
+}
+
+User: phim kinh dị hay nhất
+{
+  "intent":"top_movies",
+  "limit":1,
+  "genre":"Kinh dị"
+}
+
+User: top phim hành động hay nhất
+{
+  "intent":"top_movies",
+  "genre":"Hành động"
+}
+
+User: 5 phim hài hay nhất
+{
+  "intent":"top_movies",
+  "limit":5,
+  "genre":"Hài"
+}
+
+User: phim viễn tưởng nào được đánh giá cao nhất
+{
+  "intent":"top_movies",
+  "limit":1,
+  "genre":"Khoa học viễn tưởng"
+}
+
+QUAN TRỌNG:
+
+Nếu người dùng đề cập tới
+một con số rating cụ thể:
+
+- 8 điểm
+- 9 điểm
+- 8.5 điểm
+- trên 8 điểm
+- từ 7 điểm trở lên
+
+=> bắt buộc dùng rating_filter
+
+KHÔNG dùng top_movies.
+
+Ví dụ:
+
+"phim trên 8 điểm"
+
+=> rating_filter
+
+"phim rating trên 9"
+
+=> rating_filter
+
+"phim có đánh giá trên 8.5 điểm"
+
+=> rating_filter
+
+Ngược lại:
+
+"phim hay nhất"
+
+"phim được đánh giá cao nhất"
+
+"top phim"
+
+=> top_movies
 
 User: so sánh Star Wars và Avengers
 
