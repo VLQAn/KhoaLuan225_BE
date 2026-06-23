@@ -66,6 +66,61 @@ class ChatbotAIController extends Controller
         return $map[$genre] ?? $genre;
     }
 
+    private function buildComparisonVerdict($movie1, $movie2)
+    {
+        $describe = function ($movie) {
+            $genres = $movie->theLoai->pluck('tenTheLoai')->implode(', ');
+
+            return
+                "- Tên: {$movie->tieuDe}\n" .
+                "- Thể loại: {$genres}\n" .
+                "- Đánh giá: {$movie->danhGia}/10\n" .
+                "- Thời lượng: {$movie->thoiLuong} phút\n" .
+                "- Đạo diễn: {$movie->daoDien}\n" .
+                "- Diễn viên: {$movie->dienVien}\n" .
+                "- Tóm tắt: {$movie->moTa}\n";
+        };
+
+        $prompt =
+            "Dưới đây là dữ liệu 2 bộ phim:\n\n" .
+            "PHIM 1:\n" . $describe($movie1) . "\n" .
+            "PHIM 2:\n" . $describe($movie2);
+
+        $response = OpenAI::chat()->create([
+            'model' => 'gpt-4o-mini',
+            'temperature' => 0.3,
+            'max_tokens' => 300,
+            'messages' => [
+                [
+                    'role' => 'system',
+                    'content' => "
+Bạn là trợ lý tư vấn phim của RACSO Cinema.
+
+NHIỆM VỤ: dựa vào dữ liệu 2 bộ phim được cung cấp, hãy:
+1. Kết luận nên xem phim nào (chọn 1 trong 2; nếu thực sự khó phân định
+   thì nói rõ là hai phim ngang nhau và gợi ý theo sở thích).
+2. Giải thích lý do ngắn gọn, dựa trên khác biệt cụ thể
+   (đánh giá, thể loại, thời lượng, nội dung).
+
+QUY TẮC:
+- CHỈ dùng dữ liệu được cung cấp, KHÔNG bịa thêm thông tin
+  (không tự thêm doanh thu, giải thưởng, đánh giá khán giả... nếu không có trong dữ liệu).
+- Trả lời bằng tiếng Việt, tối đa 3-4 câu, văn phong tự nhiên như đang tư vấn trực tiếp.
+- Không liệt kê gạch đầu dòng, viết thành đoạn văn liền mạch.
+- Nếu điểm đánh giá gần bằng nhau, ưu tiên gợi ý theo khác biệt thể loại/nội dung
+  thay vì chỉ dựa vào điểm số.
+"
+                ],
+                [
+                    'role' => 'user',
+                    'content' => $prompt
+                ]
+            ]
+        ]);
+
+        return trim($response->choices[0]->message->content);
+    }
+
     public function ask(Request $request)
     {
         $request->validate([
@@ -371,18 +426,13 @@ KHUYẾN MÃI
                 ]);
             }
 
-            $suggestion = null;
-            if ($movie1->danhGia != $movie2->danhGia) {
-                $suggestion = $movie1->danhGia > $movie2->danhGia
-                    ? $movie1->tieuDe
-                    : $movie2->tieuDe;
-            }
+            $verdict = $this->buildComparisonVerdict($movie1, $movie2);
 
             return response()->json([
                 'type' => 'comparison',
                 'movie1' => $movie1,
                 'movie2' => $movie2,
-                'suggestion' => $suggestion
+                'verdict' => $verdict
             ]);
         }
 
