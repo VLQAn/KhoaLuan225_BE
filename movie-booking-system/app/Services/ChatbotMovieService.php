@@ -225,39 +225,25 @@ class ChatbotMovieService
     =========================
     */
     public function getRecommendedMovies(
-        string $movieName
+        string $movieName,
+        int $limit = 5
     ) {
-        $movie =
-            $this->findMovie(
-                $movieName
-            );
+        $movie = $this->findMovie($movieName);
 
         if (!$movie) {
             return collect();
         }
 
-        $genreIds =
-            $movie->theLoai
-            ->pluck('maTheLoai');
+        $genreIds = $movie->theLoai->pluck('maTheLoai');
 
         return Phim::with('theLoai')
-            ->where(
-                'maPhim',
-                '!=',
-                $movie->maPhim
-            )
-            ->whereHas(
-                'theLoai',
-                function ($query)
-                use ($genreIds) {
-
-                    $query->whereIn(
-                        'the_loai.maTheLoai',
-                        $genreIds
-                    );
-                }
-            )
-            ->limit(5)
+            ->where('maPhim', '!=', $movie->maPhim)
+            ->where('trangThai', 'dang_chieu')       
+            ->whereHas('theLoai', function ($query) use ($genreIds) {
+                $query->whereIn('the_loai.maTheLoai', $genreIds);
+            })
+            ->orderByDesc('danhGia')                 
+            ->limit($limit)
             ->get();
     }
 
@@ -362,42 +348,26 @@ class ChatbotMovieService
             ->get();
     }
 
-    public function getMoviesByGenre(
-        string $genre
-    ) {
+    public function getMoviesByGenre(string $genre)
+    {
         $genreMap = [
-
             'hanh dong' => 'Hành động',
-
             'kinh di' => 'Kinh dị',
-
             'hai' => 'Hài',
-
             'vien tuong' => 'Viễn tưởng',
-
             'tinh cam' => 'Tình cảm',
-
             'phieu luu' => 'Phiêu lưu',
-
             'hoat hinh' => 'Hoạt hình'
         ];
 
-        $realGenre =
-            $genreMap[$genre]
-            ?? $genre;
+        $realGenre = $genreMap[$genre] ?? $genre;
 
         return Phim::with('theLoai')
-            ->whereHas(
-                'theLoai',
-                function ($query)
-                use ($realGenre) {
-
-                    $query->where(
-                        'tenTheLoai',
-                        $realGenre
-                    );
-                }
-            )
+            ->where('trangThai', 'dang_chieu')        
+            ->whereHas('theLoai', function ($query) use ($realGenre) {
+                $query->where('tenTheLoai', $realGenre);
+            })
+            ->orderByDesc('danhGia')                  
             ->get();
     }
 

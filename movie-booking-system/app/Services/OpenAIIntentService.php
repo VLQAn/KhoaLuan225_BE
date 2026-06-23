@@ -249,18 +249,103 @@ User: phim siêu anh hùng
   "genre":"Siêu anh hùng"
 }
 
-User: có phim dành cho trẻ em không
-
+User: có phim nào cho trẻ em xem không
 {
   "intent":"genre_filter",
-  "genre":"Hoạt hình"
+  "genre":"Hoạt hình",
+  "audience":"trẻ em"
 }
 
 User: Phim cho trẻ con coi
-
 {
   "intent":"genre_filter",
-  "genre":"Hoạt hình"
+  "genre":"Hoạt hình",
+  "audience":"trẻ em"
+}
+
+User: có phim nào thích hợp dành cho cặp đôi không
+{
+  "intent":"genre_filter",
+  "genre":"Tình cảm",
+  "audience":"cặp đôi"
+}
+
+User: phim nào hợp xem cùng người yêu
+{
+  "intent":"genre_filter",
+  "genre":"Tình cảm",
+  "audience":"cặp đôi"
+}
+
+User: phim nào hợp xem cả gia đình
+{
+  "intent":"genre_filter",
+  "genre":"Gia đình",
+  "audience":"gia đình"
+}
+
+QUAN TRỌNG: chỉ thêm "audience" khi người dùng hỏi theo
+ĐỐI TƯỢNG XEM (trẻ em, cặp đôi, gia đình...).
+Nếu người dùng hỏi trực tiếp theo THỂ LOẠI (kinh dị, hài, hành động...)
+thì KHÔNG thêm "audience", chỉ trả "genre".
+
+User: gợi ý phim kinh dị hay đang chiếu
+{
+  "intent":"genre_filter",
+  "genre":"Kinh dị"
+}
+
+User: Mình thích phim kinh dị, gợi ý vài phim kinh dị hay đang chiếu
+{
+  "intent":"genre_filter",
+  "genre":"Kinh dị"
+}
+
+QUAN TRỌNG - PHÂN BIỆT "recommendation" VÀ "genre_filter":
+
+- Dùng "recommendation" CHỈ KHI người dùng nhắc tên một phim cụ thể
+  để tìm phim "giống"/"tương tự" phim đó.
+  Ví dụ: "gợi ý phim giống Star Wars", "gợi ý phim tương tự Toy Story".
+
+- Dùng "genre_filter" khi người dùng muốn gợi ý phim theo THỂ LOẠI
+  hoặc theo ĐỐI TƯỢNG XEM, KHÔNG nhắc tên phim cụ thể để so sánh.
+  Ví dụ: "gợi ý phim kinh dị hay đang chiếu",
+  "có phim nào hợp cho cặp đôi không".
+
+ÁNH XẠ ĐỐI TƯỢNG XEM SANG THỂ LOẠI (dùng cho genre_filter):
+
+- trẻ em / thiếu nhi / con nít / bé  -> "Hoạt hình"
+- cặp đôi / người yêu / hẹn hò / valentine -> "Tình cảm"
+- gia đình / cả nhà -> "Gia đình"
+
+User: có phim nào thích hợp dành cho cặp đôi không
+{
+  "intent":"genre_filter",
+  "genre":"Tình cảm"
+}
+
+User: phim nào hợp xem cùng người yêu
+{
+  "intent":"genre_filter",
+  "genre":"Tình cảm"
+}
+
+User: gợi ý phim kinh dị hay đang chiếu
+{
+  "intent":"genre_filter",
+  "genre":"Kinh dị"
+}
+
+User: Mình thích phim kinh dị, gợi ý vài phim kinh dị hay đang chiếu
+{
+  "intent":"genre_filter",
+  "genre":"Kinh dị"
+}
+
+User: gợi ý cho mình phim tương tự Toy Story
+{
+  "intent":"recommendation",
+  "movie":"Toy Story"
 }
 
 User: gợi ý phim giống Star Wars
@@ -475,6 +560,31 @@ User: Avengers và Star Wars khác gì nhau
   "movie1":"Avengers",
   "movie2":"Star Wars"
 }
+
+User: giữa Your Name và Yên Chi Khâu thì nên xem phim nào
+{
+  "intent":"comparison",
+  "movie1":"Your Name",
+  "movie2":"Yên Chi Khâu"
+}
+
+User: giữa Avengers và Star Wars thì phim nào hay hơn
+{
+  "intent":"comparison",
+  "movie1":"Avengers",
+  "movie2":"Star Wars"
+}
+
+User: giữa Avengers và Star Wars nên chọn phim nào để xem
+{
+  "intent":"comparison",
+  "movie1":"Avengers",
+  "movie2":"Star Wars"
+}
+
+QUAN TRỌNG: cấu trúc "giữa X và Y thì..." / "giữa X với Y thì..."
+LUÔN là intent "comparison", bất kể vế sau là "nên xem phim nào",
+"phim nào hay hơn", hay "phim nào đáng xem hơn".
 
 User: đặt vé Star Wars
 

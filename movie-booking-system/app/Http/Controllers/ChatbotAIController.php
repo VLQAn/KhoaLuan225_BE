@@ -47,30 +47,23 @@ class ChatbotAIController extends Controller
         $this->xuatChieuService = $xuatChieuService;
     }
 
-    private function normalizeGenre(
-        string $genre
-    ) {
+    private function normalizeGenre(string $genre)
+    {
         $map = [
+            'Viễn tưởng' => 'Khoa học viễn tưởng',
+            'Sci-fi' => 'Khoa học viễn tưởng',
+            'Khoa học viễn tưởng' => 'Khoa học viễn tưởng',
+            'Trẻ em' => 'Hoạt hình',
+            'Thiếu nhi' => 'Hoạt hình',
 
-            'Viễn tưởng' =>
-            'Khoa học viễn tưởng',
-
-            'Sci-fi' =>
-            'Khoa học viễn tưởng',
-
-            'Khoa học viễn tưởng' =>
-            'Khoa học viễn tưởng',
-
-            'Trẻ em' =>
-            'Hoạt hình',
-
-            'Thiếu nhi' =>
-            'Hoạt hình'
+            // mới thêm cho gợi ý theo đối tượng xem
+            'Cặp đôi' => 'Tình cảm',
+            'Người yêu' => 'Tình cảm',
+            'Hẹn hò' => 'Tình cảm',
+            'Valentine' => 'Tình cảm',
         ];
 
-        return
-            $map[$genre]
-            ?? $genre;
+        return $map[$genre] ?? $genre;
     }
 
     public function ask(Request $request)
@@ -367,44 +360,29 @@ KHUYẾN MÃI
             );
         }
 
-        if (
-            $aiIntentName ===
-            'comparison'
-        ) {
+        if ($aiIntentName === 'comparison') {
 
-            $movie1 =
-                $this->movieService
-                ->getMovieByName(
-                    $aiIntent['movie1']
-                );
+            $movie1 = $this->movieService->getMovieByName($aiIntent['movie1']);
+            $movie2 = $this->movieService->getMovieByName($aiIntent['movie2']);
 
-            $movie2 =
-                $this->movieService
-                ->getMovieByName(
-                    $aiIntent['movie2']
-                );
-
-            if (
-                !$movie1 ||
-                !$movie2
-            ) {
-
+            if (!$movie1 || !$movie2) {
                 return response()->json([
-                    'type' =>
-                    'movie_not_found'
+                    'type' => 'movie_not_found'
                 ]);
             }
 
+            $suggestion = null;
+            if ($movie1->danhGia != $movie2->danhGia) {
+                $suggestion = $movie1->danhGia > $movie2->danhGia
+                    ? $movie1->tieuDe
+                    : $movie2->tieuDe;
+            }
+
             return response()->json([
-
-                'type' =>
-                'comparison',
-
-                'movie1' =>
-                $movie1,
-
-                'movie2' =>
-                $movie2
+                'type' => 'comparison',
+                'movie1' => $movie1,
+                'movie2' => $movie2,
+                'suggestion' => $suggestion
             ]);
         }
 
@@ -435,29 +413,30 @@ KHUYẾN MÃI
         }
 
         // genre AI
-        if (
-            $aiIntentName ===
-            'genre_filter'
-        ) {
+        if ($aiIntentName === 'genre_filter') {
 
-            $genre =
-                $this->normalizeGenre(
-                    $aiIntent['genre']
-                );
+            $genre = $this->normalizeGenre($aiIntent['genre']);
+            $audience = $aiIntent['audience'] ?? null;
+
+            $movies = $this->movieService->getMoviesByGenre($genre);
+
+            if ($movies->isEmpty()) {
+                return response()->json([
+                    'type' => 'genre_filter',
+                    'genre' => $genre,
+                    'audience' => $audience,
+                    'movies' => [],
+                    'reply' => $audience
+                        ? "Xin lỗi, hiện tôi chưa có phim nào dành cho {$audience} đang chiếu."
+                        : "Xin lỗi, hiện tôi chưa có phim {$genre} đang chiếu."
+                ]);
+            }
 
             return response()->json([
-
-                'type' =>
-                'genre_filter',
-
-                'genre' =>
-                $genre,
-
-                'movies' =>
-                $this->movieService
-                    ->getMoviesByGenre(
-                        $genre
-                    )
+                'type' => 'genre_filter',
+                'genre' => $genre,
+                'audience' => $audience,
+                'movies' => $movies
             ]);
         }
 
@@ -483,21 +462,14 @@ KHUYẾN MÃI
         }
 
         // recommendMovies
-        if (
-            $aiIntentName ===
-            'recommendation'
-        ) {
+        if ($aiIntentName === 'recommendation') {
+
+            $movies = $this->movieService->getRecommendedMovies($aiIntent['movie']);
 
             return response()->json([
-
-                'type' =>
-                'recommendation',
-
-                'movies' =>
-                $this->movieService
-                    ->getRecommendedMovies(
-                        $aiIntent['movie']
-                    )
+                'type' => 'recommendation',
+                'title' => "Có thể bạn cũng thích các phim sau",
+                'movies' => $movies
             ]);
         }
 
