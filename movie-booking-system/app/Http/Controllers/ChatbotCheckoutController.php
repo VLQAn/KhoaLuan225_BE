@@ -2,87 +2,86 @@
 
 namespace App\Http\Controllers;
 
-use App\Services\ChatbotSessionService;
+use App\Models\HoaDon;
+use App\Models\BapNuoc;
 use Illuminate\Support\Facades\Auth;
-use App\Models\XuatChieu;
-use App\Models\Ghe;
-use App\Models\GiaVe;
-use Carbon\Carbon;
 
 class ChatbotCheckoutController extends Controller
 {
-    public function info()
+    public function info($maHoaDon)
     {
-        $session =
-            app(ChatbotSessionService::class)
-            ->getOrCreate(Auth::id());
+        $hoaDon = HoaDon::with([
+            'ves.ghe',
+            'ves.xuatChieu.phim',
+            'ves.xuatChieu.phongChieu.rapChieu',
+            'bapNuocs'
+        ])->find($maHoaDon);
 
-        $data =
-            json_decode(
-                $session->duLieu,
-                true
-            );
+        if (!$hoaDon) {
+            return response()->json([
+                'message' => 'Không tìm thấy hóa đơn'
+            ], 404);
+        }
 
-        $showtime =
-            XuatChieu::with([
-                'phim',
-                'phongChieu.rapChieu'
-            ])
-            ->find(
-                $session->xuatChieuDangChon
-            );
+        if ($hoaDon->maNguoiDung !== Auth::id()) {
+            return response()->json([
+                'message' => 'Bạn không có quyền xem hóa đơn này'
+            ], 403);
+        }
 
-        $seatIds =
-            $data['selected_seat_ids']
-            ?? [];
+        $xuatChieu = $hoaDon->ves->first()?->xuatChieu;
 
-        $seats =
-            Ghe::whereIn(
-                'maGhe',
-                $seatIds
-            )->get();
+        $seats = $hoaDon->ves
+            ->map(fn($ve) => $ve->ghe)
+            ->filter()
+            ->values();
 
-        $gioChieu =
-            Carbon::parse(
-                $showtime->thoiGianBatDau
-            )->format('H:i:s');
+        $giaVe = $hoaDon->ves->first()?->gia ?? 0;
 
-        $giaVeModel =
-            GiaVe::where(
-                'gioBatDau',
-                '<=',
-                $gioChieu
-            )
-            ->where(
-                'gioKetThuc',
-                '>',
-                $gioChieu
-            )
-            ->first();
+        $seatPrice = $hoaDon->ves->sum('gia');
 
-        $giaVe =
-            $giaVeModel?->gia ?? 0;
+        $monIds = $hoaDon->bapNuocs->pluck('maMon');
+
+        $monAns = BapNuoc::whereIn('maMon', $monIds)
+            ->get()
+            ->keyBy('maMon');
+
+        $foods = $hoaDon->bapNuocs->map(function ($item) use ($monAns) {
+
+            $mon = $monAns->get($item->maMon);
+
+            return [
+                'maMon' => $item->maMon,
+                'tenMon' => $mon?->tenMon,
+                'gia' => $item->donGia
+            ];
+        })->values();
+
+        $cart = $hoaDon->bapNuocs
+            ->pluck('soLuong', 'maMon')
+            ->toArray();
 
         return response()->json([
 
-            'xuatChieu' =>
-            $showtime,
+            'invoiceId' => $hoaDon->maHoaDon,
 
-            'selectedSeats' =>
-            $seats,
+            'xuatChieu' => $xuatChieu,
 
-            'giaVe' =>
-            $giaVe,
+            'selectedSeats' => $seats,
 
-            'seatPrice' =>
-            $giaVe * count($seats),
+            'giaVe' => $giaVe,
 
-            'total' =>
-            $giaVe * count($seats),
+            'seatPrice' => $seatPrice,
 
-            'foods' => [],
+            'total' => $hoaDon->tongThanhToan,
 
-            'cart' => []
+            'foods' => $foods,
+
+            'cart' => $cart,
+
+            'trangThai' => $hoaDon->trangThai,
+
+            'chatbotBooking' => true
         ]);
     }
 }

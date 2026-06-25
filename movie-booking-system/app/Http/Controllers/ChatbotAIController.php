@@ -187,6 +187,8 @@ QUY TẮC:
                 [
                     'select_showtime',
                     'select_seat',
+                    'ask_food',
+                    'select_food',
                     'checkout',
                     'confirm_booking',
                     'payment',

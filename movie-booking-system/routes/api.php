@@ -387,6 +387,6 @@ Route::middleware('auth:sanctum')
 
 Route::middleware('auth:sanctum')
     ->get(
-        '/chatbot/checkout-info',
+        '/chatbot/checkout-info/{maHoaDon}',
         [ChatbotCheckoutController::class, 'info']
     );

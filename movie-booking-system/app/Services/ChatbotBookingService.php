@@ -8,6 +8,7 @@ use App\Services\ChatbotSessionService;
 use Illuminate\Support\Facades\Log;
 use App\Models\Ghe;
 use App\Models\Ve;
+use App\Models\BapNuoc;
 
 class ChatbotBookingService
 {
@@ -33,6 +34,7 @@ class ChatbotBookingService
         ?int $userId = null,
         array $aiIntent = []
     ) {
+        $message = preg_replace('/\s*\(yêu\s*cầu\s*\d+\s*vé\)\s*$/iu', '', $message);
 
         $session =
             $this->sessionService
@@ -104,55 +106,64 @@ class ChatbotBookingService
         }
 
         switch ($step) {
+
             case 'select_showtime':
 
-                return
-                    $this->handleShowtimeSelection(
-                        $message,
-                        $session
-                    );
+                return $this->handleShowtimeSelection(
+                    $message,
+                    $session
+                );
 
             case 'select_seat':
 
-                return
-                    $this->handleSeatSelection(
-                        $message,
-                        $session
-                    );
+                return $this->handleSeatSelection(
+                    $message,
+                    $session
+                );
+
+            case 'ask_food':
+
+                return $this->handleAskFood(
+                    $message,
+                    $session
+                );
+
+            case 'select_food':
+
+                return $this->handleFoodSelection(
+                    $message,
+                    $session
+                );
 
             case 'checkout':
 
-                return
-                    $this->handleCheckout(
-                        $session
-                    );
+                return $this->handleCheckout(
+                    $session
+                );
 
             case 'confirm_booking':
 
-                return
-                    $this->handleConfirmBooking(
-                        $message,
-                        $session,
-                        $userId
-                    );
+                return $this->handleConfirmBooking(
+                    $message,
+                    $session,
+                    $userId
+                );
 
             case 'smart_booking_ready':
 
-                return
-                    $this->handleSmartBookingConfirm(
-                        $message,
-                        $session,
-                        $userId
-                    );
+                return $this->handleSmartBookingConfirm(
+                    $message,
+                    $session,
+                    $userId
+                );
 
             default:
 
-                return
-                    $this->handleBookingStart(
-                        $message,
-                        $session,
-                        $aiIntent
-                    );
+                return $this->handleBookingStart(
+                    $message,
+                    $session,
+                    $aiIntent
+                );
         }
     }
 
@@ -251,7 +262,7 @@ class ChatbotBookingService
             )
             ->where(
                 'trangThai',
-                'Sap_Chieu'
+                'sap_chieu'
             )
             ->orderBy(
                 'thoiGianBatDau'
@@ -346,7 +357,7 @@ class ChatbotBookingService
             )
             ->where(
                 'trangThai',
-                'sap_Chieu'
+                'sap_chieu'
             )
             ->orderBy(
                 'thoiGianBatDau'
@@ -787,33 +798,128 @@ class ChatbotBookingService
             ->setData(
                 $session->maPhien,
                 'booking_step',
-                'checkout'
+                'ask_food'
             );
 
         return [
 
-            'type' => 'booking_checkout',
-
-            'showtimeId' =>
-            $showtime->maXuatChieu,
-
-            'selectedSeats' =>
-            $seats,
-
-            'quantity' =>
-            $quantity,
-
-            'checkoutUrl' =>
-            '/checkout',
+            'type' =>
+            'ask_food',
 
             'reply' =>
-            '✅ Chọn ghế thành công. Nhấn vào đây để xem thông tin đặt vé.'
+            '🍿 Bạn có muốn đặt thêm bắp nước không?'
         ];
+    }
+
+    private function handleAskFood(
+        string $message,
+        $session
+    ) {
+        $message = mb_strtolower(trim($message));
+
+        $noWords = ['khong', 'không', 'ko', 'k', 'no'];
+
+        if (in_array($message, $noWords)) {
+
+            $this->sessionService->setData($session->maPhien, 'foods', []);
+            $this->sessionService->setData($session->maPhien, 'booking_step', 'checkout');
+
+            return $this->handleCheckout($session);
+        }
+
+        $showtime = XuatChieu::with('phongChieu')
+            ->find($session->xuatChieuDangChon);
+
+        $maRap = $showtime?->phongChieu?->maRap;
+
+        $foods = BapNuoc::where('maRap', $maRap)
+            ->where('trangThai', 'DANG_BAN')
+            ->get();
+
+        if ($foods->isEmpty()) {
+
+            $this->sessionService->setData($session->maPhien, 'foods', []);
+            $this->sessionService->setData($session->maPhien, 'booking_step', 'checkout');
+
+            return $this->handleCheckout($session);
+        }
+
+        $this->sessionService->setData($session->maPhien, 'booking_step', 'select_food');
+
+        $list = $foods->map(function ($f) {
+
+            $line = "- {$f->tenMon}: " . number_format($f->gia) . " VNĐ";
+
+            if (!empty($f->moTa)) {
+                $line .= "\n  {$f->moTa}";
+            }
+
+            return $line;
+        })->implode("\n\n");
+
+        return [
+            'type' => 'food_list',
+            'foods' => $foods,
+            'reply' =>
+            "🍿 Hiện rạp đang phục vụ các món sau:\n\n{$list}\n\n👉 Bạn muốn đặt món nào và mấy phần? (Ví dụ: {$foods->first()->tenMon} 2 phần)"
+        ];
+    }
+
+    private function handleFoodSelection(
+        string $message,
+        $session
+    ) {
+        $clean = trim($message);
+
+        $quantity = 1;
+        $name = $clean;
+
+        if (preg_match('/^(\d+)\s+(.+)$/u', $clean, $m)) {
+            $quantity = (int) $m[1];
+            $name = trim($m[2]);
+        } elseif (preg_match('/^(.+?)\s+(\d+)\s*(?:phần|phan)?$/u', $clean, $m)) {
+            $name = trim($m[1]);
+            $quantity = (int) $m[2];
+        }
+
+        $showtime = XuatChieu::with('phongChieu')
+            ->find($session->xuatChieuDangChon);
+
+        $maRap = $showtime?->phongChieu?->maRap;
+
+        $monAn = BapNuoc::where('maRap', $maRap)
+            ->where('trangThai', 'DANG_BAN')
+            ->where('tenMon', 'like', "%{$name}%")
+            ->first();
+
+        if (!$monAn) {
+
+            return [
+                'type' => 'booking',
+                'reply' => "Mình không tìm thấy món \"{$name}\" đang được phục vụ tại rạp này. Bạn vui lòng nhập lại tên món, ví dụ: bắp rang 2 phần."
+            ];
+        }
+
+        $this->sessionService->setData(
+            $session->maPhien,
+            'foods',
+            [[
+                'maMon' => $monAn->maMon,
+                'name' => $monAn->tenMon,
+                'quantity' => $quantity,
+            ]]
+        );
+
+        $this->sessionService->setData($session->maPhien, 'booking_step', 'checkout');
+
+        return $this->handleCheckout($session);
     }
 
     private function handleCheckout(
         $session
     ) {
+        $session->refresh();
+
         $data = is_array($session->duLieu)
             ? $session->duLieu
             : json_decode(
@@ -822,8 +928,10 @@ class ChatbotBookingService
             );
 
         $selectedSeats = $data['selected_seats'] ?? [];
+        $selectedSeatIds = $data['selected_seat_ids'] ?? [];
         $quantity = $data['quantity'] ?? 1;
         $showtimeId = $session->xuatChieuDangChon;
+        $foods = $data['foods'] ?? [];
         $movieTitle = null;
 
         if ($showtimeId) {
@@ -831,21 +939,72 @@ class ChatbotBookingService
             $movieTitle = $showtime?->phim?->tieuDe;
         }
 
-        if (empty($showtimeId) || empty($selectedSeats)) {
+        if (empty($showtimeId) || empty($selectedSeatIds)) {
             return [
                 'type' => 'booking',
                 'reply' => 'Phiên đặt vé chưa hoàn tất. Vui lòng chọn suất chiếu và ghế trước.'
             ];
         }
 
+        try {
+
+            $result = $this->datVeService->datVe([
+                'maXuatChieu' => $showtimeId,
+                'danhSachGhe' => $selectedSeatIds,
+                'danhSachMonAn' => array_map(
+                    fn($f) => [
+                        'maMon' => $f['maMon'],
+                        'soLuong' => $f['quantity']
+                    ],
+                    $foods
+                )
+            ]);
+        } catch (\Exception $e) {
+
+            return [
+                'type' => 'booking',
+                'reply' => 'Không thể tạo hóa đơn: ' . $e->getMessage()
+            ];
+        }
+
+        $hoaDon = $result['hoaDon'];
+
+        $this->sessionService
+            ->setData(
+                $session->maPhien,
+                'maHoaDon',
+                $hoaDon->maHoaDon
+            );
+
+        // step = payment để lần message tiếp theo controller tự clear session
+        $this->sessionService
+            ->setData(
+                $session->maPhien,
+                'booking_step',
+                'payment'
+            );
+
+        $foodText = empty($foods)
+            ? ''
+            : ', ' . implode(
+                ', ',
+                array_map(
+                    fn($f) => "{$f['name']} {$f['quantity']} phần",
+                    $foods
+                )
+            );
+
         return [
-            'type' => 'booking_checkout',
-            'checkoutUrl' => '/checkout',
+            'type' => 'booking_invoice',
+            'invoiceId' => $hoaDon->maHoaDon,
             'movieTitle' => $movieTitle,
-            'showtimeId' => $showtimeId,
             'selectedSeats' => $selectedSeats,
             'quantity' => $quantity,
-            'reply' => '✅ Chọn ghế thành công. Nhấn vào đây để xem thông tin đặt vé.'
+            'total' => $result['tongThanhToan'],
+            'reply' =>
+            "✅ Mình đã đặt cho bạn {$quantity} vé phim {$movieTitle}, ghế "
+                . implode(', ', $selectedSeats)
+                . "{$foodText}. Click để xem chi tiết hóa đơn thanh toán."
         ];
     }
 
