@@ -529,6 +529,17 @@ KHUYẾN MÃI
             $aiIntentName ===
             'showtime_query'
         ) {
+            Log::info('SHOWTIME_DEBUG', [
+
+                'message' => $request->message,
+
+                'ai_movie' =>
+                $aiIntent['movie'] ?? null,
+
+                'full_ai' =>
+                $aiIntent
+            ]);
+
             $movie =
                 $this->movieService
                 ->getMovieByName(
