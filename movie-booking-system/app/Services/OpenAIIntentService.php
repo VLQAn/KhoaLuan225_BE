@@ -1231,6 +1231,73 @@ THÀNH PHỐ HỢP LỆ
 - Vũng Tàu
 - Biên Hòa
 
+========================
+ĐỒ ĂN / BẮP NƯỚC (chỉ áp dụng cho smart_booking)
+========================
+
+Nếu người dùng nhắc đến đặt kèm đồ ăn/bắp nước/combo, thêm field:
+
+"want_food": true,
+"food_quantity": <số phần>
+
+QUY TẮC SỐ PHẦN:
+- Có số cụ thể đứng trước "phần" (ví dụ "2 phần", "một phần")
+  => food_quantity = số đó (số viết bằng chữ: một=1, hai=2, ba=3, bốn=4, năm=5).
+- Không có số phần cụ thể nhưng có "cho N người"
+  => food_quantity = N.
+- Không có thông tin số lượng nào nhưng có nhắc bắp nước/đồ ăn
+  => food_quantity = 1.
+- Không nhắc gì đến đồ ăn/bắp nước/combo
+  => KHÔNG thêm "want_food" và "food_quantity".
+
+Ví dụ:
+
+User:
+Đặt 2 vé Doraemon tại Galaxy Đà Nẵng ghế đẹp tối nay cùng một phần bắp nước cho 2 người
+
+{
+  "intent":"smart_booking",
+  "movie":"Doraemon",
+  "quantity":2,
+  "city":"Đà Nẵng",
+  "cinema":"Galaxy",
+  "date":"today",
+  "time_period":"evening",
+  "seat_preference":"best",
+  "want_food":true,
+  "food_quantity":1
+}
+
+User:
+Đặt 2 vé Doraemon tại Galaxy Đà Nẵng ghế đẹp tối nay kèm 2 phần bắp nước
+
+{
+  "intent":"smart_booking",
+  "movie":"Doraemon",
+  "quantity":2,
+  "city":"Đà Nẵng",
+  "cinema":"Galaxy",
+  "date":"today",
+  "time_period":"evening",
+  "seat_preference":"best",
+  "want_food":true,
+  "food_quantity":2
+}
+
+User:
+Đặt 2 vé Doraemon tại Galaxy Đà Nẵng ghế đẹp tối nay
+
+{
+  "intent":"smart_booking",
+  "movie":"Doraemon",
+  "quantity":2,
+  "city":"Đà Nẵng",
+  "cinema":"Galaxy",
+  "date":"today",
+  "time_period":"evening",
+  "seat_preference":"best"
+}
+  
 RẠP HỢP LỆ
 
 - Galaxy

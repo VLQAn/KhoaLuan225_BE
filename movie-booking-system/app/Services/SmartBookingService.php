@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\BapNuoc;
 use App\Models\Phim;
 use App\Models\RapChieu;
 use App\Models\XuatChieu;
@@ -204,6 +205,33 @@ class SmartBookingService
                 $rap->maRap
             );
 
+        $foods = [];
+
+        if (!empty($aiIntent['want_food'])) {
+
+            $foodQuantity = (int) ($aiIntent['food_quantity'] ?? 1);
+
+            $monAn = BapNuoc::where('maRap', $rap->maRap)
+                ->where('trangThai', 'DANG_BAN')
+                ->first();
+
+            if ($monAn) {
+
+                $foods = [[
+                    'maMon' => $monAn->maMon,
+                    'name' => $monAn->tenMon,
+                    'quantity' => $foodQuantity,
+                ]];
+            }
+        }
+
+        $this->sessionService
+            ->setData(
+                $session->maPhien,
+                'foods',
+                $foods
+            );
+
         $session->refresh();
 
         Log::info('SMART_BOOKING_SESSION_AFTER_SAVE', [
@@ -213,24 +241,22 @@ class SmartBookingService
             'data' => $session->duLieu
         ]);
 
+        $foodText = empty($foods)
+            ? ''
+            : " Đã thêm {$foods[0]['quantity']} phần {$foods[0]['name']}.";
+
         return [
-
             'type' => 'smart_booking_checkout',
-
             'movie' => $movie,
-
             'cinema' => $rap,
-
             'showtime' => $showtime,
-
             'quantity' => $quantity,
-
             'seats' => $seats,
-
+            'foods' => $foods,
             'checkoutUrl' => '/checkout',
-
             'reply' =>
-            '🎟️ Tôi đã tìm được suất chiếu phù hợp. Nhấn để xem thông tin đặt vé.'
+            "🎟️ Tôi đã tìm được suất chiếu phù hợp.{$foodText} "
+                . 'Nhấn "Xác nhận đặt vé" để hoàn tất.'
         ];
     }
 

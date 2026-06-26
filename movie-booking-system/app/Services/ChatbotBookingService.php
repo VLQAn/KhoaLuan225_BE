@@ -982,84 +982,74 @@ class ChatbotBookingService
         $session,
         ?int $userId = null
     ) {
-        if (
-            !$this->isConfirmMessage(
-                $message
-            )
-        ) {
+        if (!$this->isConfirmMessage($message)) {
             return [
-
-                'type' =>
-                'booking',
-
-                'reply' =>
-                'Vui lòng nhập "xác nhận" để hoàn tất đặt vé.'
+                'type' => 'booking',
+                'reply' => 'Vui lòng nhập "xác nhận" để hoàn tất đặt vé.'
             ];
         }
 
-        // Parse duLieu for confirm booking - handle both array and string
         $data = is_array($session->duLieu)
             ? $session->duLieu
-            : json_decode(
-                $session->duLieu ?? '{}',
-                true
-            );
+            : json_decode($session->duLieu ?? '{}', true);
+
+        $foods = $data['foods'] ?? [];
+        $selectedSeats = $data['selected_seats'] ?? [];
+        $quantity = $data['quantity'] ?? 1;
+        $showtimeId = $session->xuatChieuDangChon;
+
+        $movieTitle = null;
+        if ($showtimeId) {
+            $showtime = XuatChieu::with('phim')->find($showtimeId);
+            $movieTitle = $showtime?->phim?->tieuDe;
+        }
 
         try {
 
-            $result =
-                $this->datVeService
-                ->datVe([
-                    'maNguoiDung' =>
-                    $userId,
+            $result = $this->datVeService->datVe([
+                'maNguoiDung' => $userId,
+                'maXuatChieu' => $showtimeId,
+                'danhSachGhe' => $data['selected_seat_ids'] ?? [],
+                'danhSachMonAn' => array_map(
+                    fn($f) => ['maMon' => $f['maMon'], 'soLuong' => $f['quantity']],
+                    $foods
+                )
+            ]);
 
-                    'maXuatChieu' =>
-                    $session->xuatChieuDangChon,
+            $this->sessionService->setData(
+                $session->maPhien,
+                'maHoaDon',
+                $result['hoaDon']->maHoaDon
+            );
 
-                    'danhSachGhe' =>
-                    $data['selected_seat_ids']
-                        ?? []
-                ]);
+            $this->sessionService->clearSession($session->maPhien);
 
-            $this->sessionService
-                ->setData(
-                    $session->maPhien,
-                    'maHoaDon',
-                    $result['hoaDon']->maHoaDon
-                );
-
-            $this->sessionService
-                ->clearSession(
-                    $session->maPhien
-                );
+            $foodText = empty($foods)
+                ? ''
+                : ', ' . implode(', ', array_map(
+                    fn($f) => "{$f['name']} {$f['quantity']} phần",
+                    $foods
+                ));
 
             return [
-
-                'type' =>
-                'booking_payment',
-
-                'invoiceId' =>
-                $result['hoaDon']->maHoaDon,
-
-                'total' =>
-                $result['tongThanhToan'],
-
+                'type' => 'booking_invoice',
+                'invoiceId' => $result['hoaDon']->maHoaDon,
+                'movieTitle' => $movieTitle,
+                'selectedSeats' => $selectedSeats,
+                'quantity' => $quantity,
+                'total' => $result['tongThanhToan'],
                 'reply' =>
-                '🎟️ Đặt vé thành công. Tổng tiền: '
-                    . number_format(
-                        $result['tongThanhToan']
-                    )
-                    . ' VNĐ'
+                "✅ Đặt vé thành công! {$quantity} vé phim {$movieTitle}, ghế "
+                    . implode(', ', $selectedSeats)
+                    . "{$foodText}. Tổng tiền: "
+                    . number_format($result['tongThanhToan'])
+                    . " VNĐ. Click để xem chi tiết hóa đơn."
             ];
         } catch (\Exception $e) {
 
             return [
-
-                'type' =>
-                'booking',
-
-                'reply' =>
-                $e->getMessage()
+                'type' => 'booking',
+                'reply' => 'Không thể tạo hóa đơn: ' . $e->getMessage()
             ];
         }
     }
