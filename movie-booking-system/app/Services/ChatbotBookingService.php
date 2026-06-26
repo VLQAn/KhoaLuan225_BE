@@ -346,90 +346,59 @@ class ChatbotBookingService
         string $message,
         $session
     ) {
-
-        $movieId =
-            $session->phimDangChon;
+        $movieId = $session->phimDangChon;
 
         $showtimes =
-            XuatChieu::where(
-                'maPhim',
-                $movieId
-            )
-            ->where(
-                'trangThai',
-                'sap_chieu'
-            )
-            ->orderBy(
-                'thoiGianBatDau'
-            )
+            XuatChieu::where('maPhim', $movieId)
+            ->where('trangThai', 'sap_chieu')
+            ->orderBy('thoiGianBatDau')
             ->get();
 
-        Log::info('MOVIE_ID', [
-            'movieId' => $movieId
-        ]);
-
-        Log::info('SHOWTIMES_FOUND', [
-            'count' => $showtimes->count()
-        ]);
-
         $showtime =
-            $this->findSelectedShowtime(
-                $message,
-                $showtimes
-            );
+            $this->findSelectedShowtime($message, $showtimes);
 
         if (!$showtime) {
-
             return [
-
-                'type' =>
-                'booking',
-
-                'reply' =>
-                'Không xác định được suất chiếu. Vui lòng chọn lại.'
+                'type' => 'booking',
+                'reply' => 'Không xác định được suất chiếu. Vui lòng chọn lại.'
             ];
         }
 
-        $this->sessionService
-            ->setShowtime(
-                $session->maPhien,
-                $showtime->maXuatChieu
-            );
+        $this->sessionService->setShowtime($session->maPhien, $showtime->maXuatChieu);
+        $this->sessionService->setData($session->maPhien, 'booking_step', 'select_seat');
 
-        $this->sessionService
-            ->setData(
-                $session->maPhien,
-                'booking_step',
-                'select_seat'
-            );
-
-        // Parse duLieu JSON để lấy quantity - handle both array and string
         $sessionData = is_array($session->duLieu)
             ? $session->duLieu
-            : json_decode(
-                $session->duLieu ?? '{}',
-                true
-            );
+            : json_decode($session->duLieu ?? '{}', true);
+
         $quantity = $sessionData['quantity'] ?? 1;
 
-        Log::info('SHOWTIME_SELECTED_QUANTITY', [
-            'quantity' => $quantity,
-            'showtimeId' => $showtime->maXuatChieu
-        ]);
+        // === MỚI: lấy danh sách ghế trống ===
+        $allSeats =
+            Ghe::where('maPhong', $showtime->maPhong)
+            ->orderBy('hangGhe')
+            ->orderBy('soGhe')
+            ->get();
+
+        $bookedSeatIds =
+            Ve::where('maXuatChieu', $showtime->maXuatChieu)
+            ->whereIn('trangThai', ['Dang_Chon', 'Da_Dat'])
+            ->pluck('maGhe')
+            ->toArray();
+
+        $availableSeats =
+            $allSeats->reject(
+                fn($seat) => in_array($seat->maGhe, $bookedSeatIds)
+            )->values();
 
         return [
-
-            'type' =>
-            'booking_select_seat',
-
-            'showtimeId' =>
-            $showtime->maXuatChieu,
-
-            'quantity' =>
-            $quantity,
-
+            'type' => 'booking_select_seat',
+            'showtimeId' => $showtime->maXuatChieu,
+            'quantity' => $quantity,
+            'availableSeats' => $availableSeats,
             'reply' =>
-            '🎟️ Đã chọn suất chiếu. Vui lòng chọn ghế.'
+            "🎟️ Đã chọn suất chiếu. Hiện có {$availableSeats->count()} ghế trống. " .
+                "Vui lòng chọn {$quantity} ghế, ví dụ: A1 A2"
         ];
     }
 
