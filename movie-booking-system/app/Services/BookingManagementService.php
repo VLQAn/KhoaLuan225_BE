@@ -6,7 +6,7 @@ use App\Models\HoaDon;
 
 class BookingManagementService
 {
-    public function getAll()
+    public function getAll(int $maNguoiDung)
     {
         $hoaDons = HoaDon::with([
             'thanhToan',
@@ -15,6 +15,9 @@ class BookingManagementService
             'ves.xuatChieu.phim',
             'ves.xuatChieu.phongChieu.rapChieu'
         ])
+            ->whereHas('ves.xuatChieu.phongChieu.rapChieu', function ($query) use ($maNguoiDung) {
+                $query->where('maNguoiDung', $maNguoiDung);
+            })
             ->orderByDesc('maHoaDon')
             ->get();
 

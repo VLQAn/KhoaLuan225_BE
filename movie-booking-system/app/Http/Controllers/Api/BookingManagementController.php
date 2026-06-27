@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Services\BookingManagementService;
+use Illuminate\Http\Request;
 
 class BookingManagementController
 extends Controller
@@ -16,11 +17,13 @@ extends Controller
         $this->service = $service;
     }
 
-    public function index()
+    public function index(Request $request)
     {
+        $maNguoiDung = $request->user()->maNguoiDung;
+
         return response()->json([
             'data' =>
-            $this->service->getAll()
+            $this->service->getAll($maNguoiDung)
         ]);
     }
 }
