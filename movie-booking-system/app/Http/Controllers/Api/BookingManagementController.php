@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Services\BookingManagementService;
 use Illuminate\Http\Request;
+use Exception;
 
 class BookingManagementController
 extends Controller
@@ -25,5 +26,26 @@ extends Controller
             'data' =>
             $this->service->getAll($maNguoiDung)
         ]);
+    }
+
+    public function cancel(Request $request, $maHoaDon)
+    {
+        $maNguoiDung = $request->user()->maNguoiDung;
+
+        try {
+            $hoaDon = $this->service->cancel(
+                (int) $maHoaDon,
+                $maNguoiDung
+            );
+
+            return response()->json([
+                'message' => 'Hủy vé thành công',
+                'data' => $hoaDon
+            ]);
+        } catch (Exception $e) {
+            return response()->json([
+                'message' => $e->getMessage()
+            ], 400);
+        }
     }
 }

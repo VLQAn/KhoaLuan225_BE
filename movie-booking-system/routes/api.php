@@ -390,3 +390,8 @@ Route::middleware('auth:sanctum')
         '/chatbot/checkout-info/{maHoaDon}',
         [ChatbotCheckoutController::class, 'info']
     );
+
+Route::middleware('auth:sanctum')->put(
+    '/booking/{maHoaDon}/cancel',
+    [BookingManagementController::class, 'cancel']
+);

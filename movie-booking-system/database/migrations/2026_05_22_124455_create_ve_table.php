@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
@@ -42,6 +43,10 @@ return new class extends Migration
                 'unique_ghe_xuatchieu'
             );
         });
+
+        DB::statement(
+            "ALTER TABLE `ve` MODIFY `trangThai` ENUM('Dang_Chon', 'Da_Dat', 'Het_Gio', 'Da_Huy') NOT NULL DEFAULT 'Dang_Chon'"
+        );
     }
 
     /**
@@ -50,5 +55,9 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('ve');
+
+        DB::statement(
+            "ALTER TABLE `ve` MODIFY `trangThai` ENUM('Dang_Chon', 'Da_Dat', 'Het_Gio') NOT NULL DEFAULT 'Dang_Chon'"
+        );
     }
 };

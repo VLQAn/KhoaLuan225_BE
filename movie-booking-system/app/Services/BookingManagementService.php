@@ -3,6 +3,9 @@
 namespace App\Services;
 
 use App\Models\HoaDon;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
+use Exception;
 
 class BookingManagementService
 {
@@ -119,5 +122,46 @@ class BookingManagementService
         })
             ->filter()
             ->values();
+    }
+
+     public function cancel(int $maHoaDon, int $maNguoiDung)
+    {
+        return DB::transaction(function () use ($maHoaDon, $maNguoiDung) {
+
+            $hoaDon = HoaDon::with('ves.xuatChieu')
+                ->where('maHoaDon', $maHoaDon)
+                ->where('maNguoiDung', $maNguoiDung)
+                ->first();
+
+            if (!$hoaDon) {
+                throw new Exception(
+                    'Không tìm thấy hóa đơn hoặc bạn không có quyền hủy vé này'
+                );
+            }
+
+            if ($hoaDon->trangThai === 'Da_Huy') {
+                throw new Exception('Vé này đã được hủy trước đó');
+            }
+
+            $xuatChieu = $hoaDon->ves->first()?->xuatChieu;
+
+            if (!$xuatChieu) {
+                throw new Exception('Không tìm thấy thông tin xuất chiếu');
+            }
+
+            // Chưa đến giờ chiếu mới được hủy
+            if (Carbon::now()->greaterThanOrEqualTo($xuatChieu->thoiGianBatDau)) {
+                throw new Exception('Không thể hủy vé vì đã đến giờ chiếu');
+            }
+
+            // Hủy từng vé -> trả ghế lại cho người khác đặt được
+            foreach ($hoaDon->ves as $ve) {
+                $ve->update(['trangThai' => 'Da_Huy']);
+            }
+
+            $hoaDon->update(['trangThai' => 'Da_Huy']);
+
+            return $hoaDon;
+        });
     }
 }
