@@ -200,6 +200,7 @@ QUY TẮC:
                 ->isNewBookingRequest(
                     $request->message
                 )
+            && !$this->bookingService->isOffTopicDuringStep($request->message)
         ) {
 
             $this->sessionService

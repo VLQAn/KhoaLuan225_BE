@@ -28,6 +28,44 @@ class ChatbotBookingService
             $datVeService;
     }
 
+    public function isOffTopicDuringStep(string $message): bool
+    {
+        $msg = mb_strtolower(trim($message));
+
+        $offTopicPatterns = [
+            '/goi\s*y/u',
+            '/gợi\s*ý/u',
+            '/de\s*xuat/u',
+            '/đề\s*xuất/u',
+            '/danh\s*gia/u',
+            '/đánh\s*giá/u',
+            '/review/u',
+            '/phim\s*(gi|nao)\s*hay/u',
+            '/phim\s*gì\s*hay/u',
+            '/phim\s*nào\s*hay/u',
+            '/the\s*loai/u',
+            '/thể\s*loại/u',
+            '/khuyen\s*mai/u',
+            '/khuyến\s*mãi/u',
+            '/so\s*sanh/u',
+            '/so\s*sánh/u',
+            '/thong\s*tin\s*phim/u',
+            '/thông\s*tin\s*phim/u',
+            '/dien\s*vien/u',
+            '/diễn\s*viên/u',
+            '/dao\s*dien/u',
+            '/đạo\s*diễn/u',
+        ];
+
+        foreach ($offTopicPatterns as $pattern) {
+            if (preg_match($pattern, $msg)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     // handle()
     public function handle(
         string $message,
@@ -373,7 +411,7 @@ class ChatbotBookingService
 
         $quantity = $sessionData['quantity'] ?? 1;
 
-        // === MỚI: lấy danh sách ghế trống ===
+        // Lấy danh sách ghế trống ===
         $allSeats =
             Ghe::where('maPhong', $showtime->maPhong)
             ->orderBy('hangGhe')

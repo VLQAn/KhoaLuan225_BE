@@ -29,7 +29,7 @@ class PaymentController extends Controller
     }
 
     /**
-     * VNPay return
+     * VNPay trả về
      */
     public function vnpayReturn(
         Request $request

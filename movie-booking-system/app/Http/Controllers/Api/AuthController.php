@@ -26,7 +26,7 @@ class AuthController extends Controller
     }
 
     /**
-     * Register
+     * Đăng ký
      */
     public function register(
         RegisterRequest $request
@@ -50,7 +50,7 @@ class AuthController extends Controller
     }
 
     /**
-     * Login
+     * Đăng nhập
      */
     public function login(
         LoginRequest $request
@@ -81,7 +81,7 @@ class AuthController extends Controller
     }
 
     /**
-     * Current user
+     * User hiện tại
      */
     public function me()
     {
@@ -93,7 +93,7 @@ class AuthController extends Controller
     }
 
     /**
-     * Logout
+     * Đăng xuất
      */
     public function logout()
     {
@@ -109,7 +109,7 @@ class AuthController extends Controller
     }
 
     /**
-     * Change password
+     * Đổi mật khẩu
      */
     public function changePassword(
         ChangePasswordRequest $request
@@ -144,7 +144,7 @@ class AuthController extends Controller
     }
 
     /**
-     * Send OTP for password reset
+     * Gửi OTP đổi mật khẩu
      */
     public function sendOtp(
         Request $request
@@ -198,7 +198,7 @@ class AuthController extends Controller
     }
 
     /**
-     * Reset password
+     * Đổimật khẩu
      */
     public function resetPassword(
         Request $request
